@@ -66,7 +66,7 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
           <button className="mt-2 text-green-700 hover:underline" onClick={() => supabase.auth.signOut({ scope: 'local' })}>Выйти</button>
         </div>
       </aside>
-      <div className="flex-1">
+      <div className="min-w-0 flex-1">
         <nav className="flex gap-3 overflow-x-auto border-b border-stone-200 bg-white px-4 py-3 text-sm md:hidden">
           {nav.map((n) => <Link key={n.href} href={n.href} className="whitespace-nowrap text-stone-700">{n.label}</Link>)}
         </nav>

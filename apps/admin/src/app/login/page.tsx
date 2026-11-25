@@ -39,23 +39,23 @@ export default function LoginPage() {
         <div className="text-center text-3xl font-black tracking-wide"><span className="text-accent">TDK</span><span className="text-green-700">FOOD</span></div>
         <h1 className="text-center text-lg font-bold">Вход в админку</h1>
         {!normalized ? (
-          <>
+          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); send(); }}>
             <Field label="Номер телефона" hint="Код придёт в WhatsApp">
               <Input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" autoFocus />
             </Field>
             <ErrorText>{error}</ErrorText>
-            <Button className="w-full" onClick={send} loading={loading}>Получить код</Button>
-          </>
+            <Button type="submit" className="w-full" loading={loading}>Получить код</Button>
+          </form>
         ) : (
-          <>
+          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); if (code.length >= 6) verify(); }}>
             <p className="text-sm text-stone-500">Код отправлен на {formatPhone(normalized)}</p>
             <Field label="Код">
               <Input value={code} onChange={(e) => setCode(e.target.value)} inputMode="numeric" maxLength={6} autoFocus />
             </Field>
             <ErrorText>{error}</ErrorText>
-            <Button className="w-full" onClick={verify} loading={loading} disabled={code.length < 6}>Войти</Button>
-            <Button variant="ghost" className="w-full" onClick={() => setNormalized(null)}>Изменить номер</Button>
-          </>
+            <Button type="submit" className="w-full" loading={loading} disabled={code.length < 6}>Войти</Button>
+            <Button type="button" variant="ghost" className="w-full" onClick={() => setNormalized(null)}>Изменить номер</Button>
+          </form>
         )}
       </Card>
     </main>

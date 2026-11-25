@@ -46,7 +46,7 @@ export default function Dashboard() {
   return (
     <>
       <PageHeader title="Обзор за сегодня" />
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Заказов" value={orders.length} href="/orders" />
         <Stat label="Активных" value={active.length} href="/orders" />
         <Stat label="Выручка (доставлено)" value={formatMoney(revenue)} />
