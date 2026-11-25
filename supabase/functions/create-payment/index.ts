@@ -26,9 +26,9 @@ Deno.serve(async (req) => {
   if (auth.user?.id !== order.client_id) return json({ error: 'forbidden' }, 403);
   if (order.status !== 'awaiting_payment') return json({ error: 'order_not_awaiting_payment' }, 409);
 
-  const provider = Deno.env.get('PAYMENT_PROVIDER') ?? '';
+  const provider = (Deno.env.get('PAYMENT_PROVIDER') ?? '').trim().toLowerCase();
   if (provider === 'test') {
-    const secret = Deno.env.get('PAYMENT_TEST_SECRET');
+    const secret = Deno.env.get('PAYMENT_TEST_SECRET')?.trim();
     if (!secret) return json({ error: 'payment_not_configured' }, 500);
     const amount = String(order.total);
     const sig = await hmacHex(secret, `${order.id}:${amount}`);

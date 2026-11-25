@@ -14,10 +14,10 @@ button{background:#16a34a;color:#fff;border:0;border-radius:12px;padding:14px 24
 
 Deno.serve(async (req) => {
   const url = new URL(req.url);
-  if (url.searchParams.get('test') !== '1' || Deno.env.get('PAYMENT_PROVIDER') !== 'test') {
+  if (url.searchParams.get('test') !== '1' || (Deno.env.get('PAYMENT_PROVIDER') ?? '').trim().toLowerCase() !== 'test') {
     return new Response('not found', { status: 404 });
   }
-  const secret = Deno.env.get('PAYMENT_TEST_SECRET') ?? '';
+  const secret = (Deno.env.get('PAYMENT_TEST_SECRET') ?? '').trim();
   const orderId = url.searchParams.get('order') ?? '';
   const amount = url.searchParams.get('amount') ?? '';
   const sig = url.searchParams.get('sig') ?? '';
