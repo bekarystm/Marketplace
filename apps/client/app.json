@@ -1,23 +1,23 @@
 {
   "expo": {
-    "name": "Marketplace",
-    "slug": "marketplace-client",
-    "scheme": "marketplace",
+    "name": "TDKFOOD",
+    "slug": "tdkfood",
+    "scheme": "tdkfood",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "kz.marketplace.client",
+      "bundleIdentifier": "kz.tdkfood.client",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Чтобы определить адрес доставки и показать ближайшие магазины"
       }
     },
     "android": {
-      "package": "kz.marketplace.client",
+      "package": "kz.tdkfood.client",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#1F4D2B",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -46,6 +46,9 @@
     ],
     "experiments": {
       "typedRoutes": false
+    },
+    "splash": {
+      "backgroundColor": "#FBF7EF"
     }
   }
 }

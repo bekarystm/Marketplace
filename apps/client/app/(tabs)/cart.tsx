@@ -35,6 +35,7 @@ export default function Cart() {
     return (
       <EmptyState
         title={t('cart.empty')}
+        icon="cart-outline"
         action={<Button title={t('cart.goShopping')} onPress={() => router.navigate('/')} />}
       />
     );
@@ -82,6 +83,8 @@ export default function Cart() {
               </View>
             ) : null}
             <Button
+              variant="accent"
+              icon="arrow-forward"
               title={t('cart.checkout')}
               disabled={!totals?.canCheckout}
               onPress={() => router.push({ pathname: '/checkout', params: { storeId } })}

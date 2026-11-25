@@ -1,19 +1,22 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { formatMoney, type Store } from '@marketplace/shared';
-import { colors, font, radius, spacing } from '@marketplace/mobile';
-import { useI18n } from '@marketplace/mobile';
-import { isStoreOpen } from '@marketplace/mobile';
+import { Badge, Icon, colors, font, isStoreOpen, radius, shadow, spacing, useI18n } from '@marketplace/mobile';
 
 export function StoreCard({ store, onPress }: { store: Store; onPress: () => void }) {
   const { t } = useI18n();
   const open = isStoreOpen(store.opening_hours);
+  const freeFrom = store.free_delivery_from ? Number(store.free_delivery_from) : null;
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && { opacity: 0.9 }]}>
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && { transform: [{ scale: 0.99 }] }]}>
       <View style={styles.cover}>
         {store.cover_url ? (
           <Image source={{ uri: store.cover_url }} style={StyleSheet.absoluteFill} contentFit="cover" />
-        ) : null}
+        ) : (
+          <View style={styles.coverArt}>
+            <Icon name="leaf" size={64} color="rgba(255,255,255,0.15)" />
+          </View>
+        )}
         {!open ? (
           <View style={styles.closed}><Text style={styles.closedText}>{t('store.closed')}</Text></View>
         ) : null}
@@ -23,34 +26,49 @@ export function StoreCard({ store, onPress }: { store: Store; onPress: () => voi
           {store.logo_url ? (
             <Image source={{ uri: store.logo_url }} style={{ width: '100%', height: '100%' }} contentFit="contain" />
           ) : (
-            <Text style={{ fontSize: 22 }}>🏪</Text>
+            <Icon name="storefront" size={24} color={colors.primary} />
           )}
         </View>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, gap: 4 }}>
           <Text style={styles.name}>{store.name}</Text>
-          <Text style={styles.meta}>
-            {Number(store.delivery_fee) > 0 ? t('store.deliveryFee', { amount: formatMoney(store.delivery_fee) }) : ''}
-            {store.free_delivery_from ? ` · ${t('store.freeDeliveryFrom', { amount: formatMoney(store.free_delivery_from) })}` : ''}
-          </Text>
-          {Number(store.min_order_amount) > 0 ? (
-            <Text style={styles.meta}>{t('store.minOrder', { amount: formatMoney(store.min_order_amount) })}</Text>
-          ) : null}
+          <View style={styles.metaRow}>
+            <Icon name="bicycle-outline" size={14} color={colors.textMuted} />
+            <Text style={styles.meta}>
+              {Number(store.delivery_fee) > 0 ? formatMoney(store.delivery_fee) : '0 ₸'}
+            </Text>
+            {Number(store.min_order_amount) > 0 ? (
+              <Text style={styles.meta}>· {t('store.minOrder', { amount: formatMoney(store.min_order_amount) })}</Text>
+            ) : null}
+          </View>
         </View>
       </View>
+      {freeFrom ? (
+        <Badge
+          label={t('store.freeDeliveryFrom', { amount: formatMoney(freeFrom) })}
+          tone="accent"
+          style={styles.freeBadge}
+        />
+      ) : null}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: radius.lg, backgroundColor: colors.bg, overflow: 'hidden', borderWidth: 1, borderColor: colors.border },
-  cover: { height: 120, backgroundColor: colors.primarySoft },
-  closed: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.45)', alignItems: 'center', justifyContent: 'center' },
-  closedText: { color: colors.white, fontWeight: '700', fontSize: font.lg },
+  card: { borderRadius: radius.lg, backgroundColor: colors.card, overflow: 'hidden', ...shadow },
+  cover: { height: 110, backgroundColor: colors.primary },
+  coverArt: { flex: 1, alignItems: 'flex-end', justifyContent: 'center', paddingRight: spacing.xl },
+  closed: {
+    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(30,42,32,0.55)', alignItems: 'center', justifyContent: 'center',
+  },
+  closedText: { color: colors.white, fontWeight: '800', fontSize: font.lg },
   body: { flexDirection: 'row', gap: spacing.md, padding: spacing.md, alignItems: 'center' },
   logo: {
-    width: 48, height: 48, borderRadius: radius.md, backgroundColor: colors.surface,
-    alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+    width: 52, height: 52, borderRadius: radius.md, backgroundColor: colors.surface, marginTop: -34,
+    alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderWidth: 3, borderColor: colors.card,
   },
-  name: { fontSize: font.lg, fontWeight: '700', color: colors.text },
+  name: { fontSize: font.lg, fontWeight: '800', color: colors.text },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, flexWrap: 'wrap' },
   meta: { fontSize: font.sm, color: colors.textMuted },
+  freeBadge: { position: 'absolute', top: spacing.md, right: spacing.md },
 });

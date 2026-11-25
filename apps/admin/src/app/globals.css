@@ -1,8 +1,26 @@
 @import "tailwindcss";
 
+/* TDKFOOD brand: the default green scale is remapped to the brand's deep green,
+   so existing green-* utilities pick up the brand colors automatically. */
+@theme {
+  --color-green-50: #eef4ed;
+  --color-green-100: #e3ece2;
+  --color-green-200: #c6d8c4;
+  --color-green-300: #9dbb9a;
+  --color-green-400: #5f8b5f;
+  --color-green-500: #3a6b42;
+  --color-green-600: #1f4d2b;
+  --color-green-700: #1f4d2b;
+  --color-green-800: #163a20;
+  --color-green-900: #0f2a17;
+  --color-accent: #e8661a;
+  --color-accent-soft: #fde8da;
+  --color-cream: #fbf7ef;
+}
+
 :root {
-  --background: #fafaf9;
-  --foreground: #1c1917;
+  --background: #fbf7ef;
+  --foreground: #1e2a20;
 }
 
 body {

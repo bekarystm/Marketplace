@@ -2,7 +2,7 @@
 // Usage policy: max 1 request/second, identify the app. For production traffic,
 // switch to a self-hosted Nominatim/Photon or a commercial OSM-based provider.
 const BASE = 'https://nominatim.openstreetmap.org';
-const HEADERS = { 'User-Agent': 'MarketplaceApp/1.0', 'Accept-Language': 'ru' };
+const HEADERS = { 'User-Agent': 'TDKFOOD/1.0', 'Accept-Language': 'ru' };
 
 export async function reverseGeocode(lat: number, lng: number): Promise<string | null> {
   try {

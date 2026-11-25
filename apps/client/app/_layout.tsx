@@ -36,6 +36,9 @@ function AppStack() {
       screenOptions={{
         headerTintColor: colors.text,
         headerBackTitle: t('common.back'),
+        headerStyle: { backgroundColor: colors.bg },
+        headerShadowVisible: false,
+        headerTitleStyle: { fontWeight: '800', color: colors.text },
         contentStyle: { backgroundColor: colors.bg },
       }}
     >

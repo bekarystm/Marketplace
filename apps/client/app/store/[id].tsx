@@ -6,7 +6,7 @@ import { useCategories, useProducts, useStore } from '../../src/lib/api';
 import { useI18n } from '@marketplace/mobile';
 import { useCartControls } from '../../src/lib/hooks';
 import { ProductCard } from '../../src/components/ProductCard';
-import { Button, Chip, EmptyState, Loading, TextField } from '@marketplace/mobile';
+import { Button, Chip, EmptyState, Loading, SearchField } from '@marketplace/mobile';
 import { colors, font, spacing } from '@marketplace/mobile';
 
 export default function StoreScreen() {
@@ -45,12 +45,13 @@ export default function StoreScreen() {
         keyExtractor={(p) => p.id}
         numColumns={2}
         contentContainerStyle={{ padding: spacing.sm, paddingBottom: 120, flexGrow: 1 }}
+        style={{ backgroundColor: colors.bg }}
         ListHeaderComponent={
           <View style={{ gap: spacing.md, padding: spacing.sm }}>
             {store?.description_ru ? (
               <Text style={styles.desc}>{localized(store, 'description', locale)}</Text>
             ) : null}
-            <TextField
+            <SearchField
               value={query}
               onChangeText={setQuery}
               placeholder={t('store.searchIn', { store: store?.name ?? '' })}
@@ -69,7 +70,7 @@ export default function StoreScreen() {
             </ScrollView>
           </View>
         }
-        ListEmptyComponent={isLoading ? <Loading /> : <EmptyState title={t('common.empty')} />}
+        ListEmptyComponent={isLoading ? <Loading /> : <EmptyState icon="search-outline" title={t('common.empty')} />}
         renderItem={({ item }) => (
           <ProductCard product={item} quantity={quantityOf(item.id)} onChangeQuantity={(q) => change(item, q)} />
         )}
@@ -77,6 +78,8 @@ export default function StoreScreen() {
       {totals ? (
         <View style={styles.footer}>
           <Button
+            variant="accent"
+            icon="cart"
             title={`${t('tabs.cart')} · ${formatMoney(totals.itemsTotal)}`}
             onPress={() => router.navigate('/cart')}
           />

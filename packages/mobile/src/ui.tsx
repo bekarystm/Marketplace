@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -8,9 +8,29 @@ import {
   View,
   type StyleProp,
   type TextInputProps,
+  type TextStyle,
   type ViewStyle,
 } from 'react-native';
-import { colors, font, radius, spacing } from './theme';
+import { Ionicons } from '@expo/vector-icons';
+import { BRAND, colors, font, radius, shadow, spacing } from './theme';
+
+export type IconName = ComponentProps<typeof Ionicons>['name'];
+
+export function Icon({ name, size = 22, color = colors.text }: { name: IconName; size?: number; color?: string }) {
+  return <Ionicons name={name} size={size} color={color} />;
+}
+
+/** Text logo: TDK in orange + FOOD in deep green. */
+export function Logo({ size = 22, light }: { size?: number; light?: boolean }) {
+  return (
+    <Text style={{ fontSize: size, fontWeight: '900', letterSpacing: 0.5 }}>
+      <Text style={{ color: colors.accent }}>{BRAND.first}</Text>
+      <Text style={{ color: light ? colors.white : colors.primary }}>{BRAND.second}</Text>
+    </Text>
+  );
+}
+
+type ButtonVariant = 'primary' | 'accent' | 'secondary' | 'danger' | 'ghost';
 
 export function Button({
   title,
@@ -18,22 +38,26 @@ export function Button({
   variant = 'primary',
   disabled,
   loading,
+  icon,
   style,
 }: {
   title: string;
   onPress?: () => void;
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  variant?: ButtonVariant;
   disabled?: boolean;
   loading?: boolean;
+  icon?: IconName;
   style?: StyleProp<ViewStyle>;
 }) {
-  const bg = {
+  const bg: Record<ButtonVariant, string> = {
     primary: colors.primary,
+    accent: colors.accent,
     secondary: colors.surface,
     danger: colors.danger,
     ghost: 'transparent',
-  }[variant];
-  const fg = variant === 'primary' || variant === 'danger' ? colors.white : variant === 'ghost' ? colors.primary : colors.text;
+  };
+  const fg =
+    variant === 'secondary' ? colors.text : variant === 'ghost' ? colors.primary : colors.white;
   return (
     <Pressable
       accessibilityRole="button"
@@ -41,11 +65,20 @@ export function Button({
       disabled={disabled || loading}
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: bg, opacity: disabled ? 0.5 : pressed ? 0.85 : 1 },
+        { backgroundColor: bg[variant], opacity: disabled ? 0.45 : pressed ? 0.85 : 1 },
         style,
       ]}
     >
-      {loading ? <ActivityIndicator color={fg} /> : <Text style={[styles.buttonText, { color: fg }]}>{title}</Text>}
+      {loading ? (
+        <ActivityIndicator color={fg} />
+      ) : (
+        <View style={styles.buttonInner}>
+          {icon ? <Icon name={icon} size={18} color={fg} /> : null}
+          <Text style={[styles.buttonText, { color: fg }]} numberOfLines={1}>
+            {title}
+          </Text>
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -64,11 +97,21 @@ export function TextField({ label, error, style, ...props }: TextInputProps & { 
   );
 }
 
+/** Search input with a magnifier icon. */
+export function SearchField(props: TextInputProps) {
+  return (
+    <View style={styles.search}>
+      <Icon name="search" size={18} color={colors.textMuted} />
+      <TextInput placeholderTextColor={colors.textMuted} style={styles.searchInput} {...props} />
+    </View>
+  );
+}
+
 export function Chip({ label, active, onPress }: { label: string; active?: boolean; onPress?: () => void }) {
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.chip, active ? { backgroundColor: colors.text } : { backgroundColor: colors.surface }]}
+      style={[styles.chip, active ? { backgroundColor: colors.primary, borderColor: colors.primary } : null]}
     >
       <Text style={[styles.chipText, { color: active ? colors.white : colors.text }]}>{label}</Text>
     </Pressable>
@@ -79,6 +122,20 @@ export function Card({ children, style }: { children: ReactNode; style?: StylePr
   return <View style={[styles.card, style]}>{children}</View>;
 }
 
+/** Small rounded label, e.g. "-25%". */
+export function Badge({ label, tone = 'accent', style }: { label: string; tone?: 'accent' | 'primary' | 'muted'; style?: StyleProp<ViewStyle> }) {
+  const map = {
+    accent: { bg: colors.accentSoft, fg: colors.accentDark },
+    primary: { bg: colors.primarySoft, fg: colors.primary },
+    muted: { bg: colors.surface, fg: colors.textMuted },
+  }[tone];
+  return (
+    <View style={[styles.badge, { backgroundColor: map.bg }, style]}>
+      <Text style={[styles.badgeText, { color: map.fg }]}>{label}</Text>
+    </View>
+  );
+}
+
 export function Loading() {
   return (
     <View style={styles.center}>
@@ -87,49 +144,61 @@ export function Loading() {
   );
 }
 
-export function EmptyState({ title, action }: { title: string; action?: ReactNode }) {
+export function EmptyState({ title, icon, action }: { title: string; icon?: IconName; action?: ReactNode }) {
   return (
     <View style={[styles.center, { gap: spacing.lg, padding: spacing.xl }]}>
+      {icon ? (
+        <View style={styles.emptyIcon}>
+          <Icon name={icon} size={34} color={colors.primary} />
+        </View>
+      ) : null}
       <Text style={{ fontSize: font.lg, color: colors.textMuted, textAlign: 'center' }}>{title}</Text>
       {action}
     </View>
   );
 }
 
-export function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+export function Row({ label, value, bold, valueStyle }: { label: string; value: string; bold?: boolean; valueStyle?: StyleProp<TextStyle> }) {
   return (
     <View style={styles.row}>
-      <Text style={[styles.rowText, bold && { fontWeight: '700' }]}>{label}</Text>
-      <Text style={[styles.rowText, bold && { fontWeight: '700' }]}>{value}</Text>
+      <Text style={[styles.rowText, bold && styles.rowBold]}>{label}</Text>
+      <Text style={[styles.rowText, bold && styles.rowBold, valueStyle]}>{value}</Text>
     </View>
   );
 }
 
-export function SectionTitle({ children }: { children: ReactNode }) {
-  return <Text style={styles.section}>{children}</Text>;
+export function SectionTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
+  return (
+    <View style={styles.sectionRow}>
+      <Text style={styles.section}>{children}</Text>
+      {action}
+    </View>
+  );
 }
 
-export function RadioRow({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
+export function RadioRow({ label, selected, onPress, icon }: { label: string; selected: boolean; onPress: () => void; icon?: IconName }) {
   return (
     <Pressable onPress={onPress} style={styles.radioRow}>
+      {icon ? <Icon name={icon} size={20} color={selected ? colors.primary : colors.textMuted} /> : null}
+      <Text style={{ fontSize: font.md, color: colors.text, flex: 1 }}>{label}</Text>
       <View style={[styles.radio, selected && { borderColor: colors.primary }]}>
         {selected ? <View style={styles.radioDot} /> : null}
       </View>
-      <Text style={{ fontSize: font.md, color: colors.text, flex: 1 }}>{label}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: 50,
+    minHeight: 52,
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
   },
-  buttonText: { fontSize: font.md, fontWeight: '600' },
-  label: { fontSize: font.sm, color: colors.textMuted },
+  buttonInner: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  buttonText: { fontSize: font.md, fontWeight: '700' },
+  label: { fontSize: font.sm, color: colors.textMuted, fontWeight: '500' },
   input: {
     borderWidth: 1,
     borderColor: colors.border,
@@ -138,17 +207,47 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     fontSize: font.md,
     color: colors.text,
-    backgroundColor: colors.bg,
+    backgroundColor: colors.card,
   },
   error: { fontSize: font.sm, color: colors.danger },
-  chip: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radius.pill },
-  chipText: { fontSize: font.sm, fontWeight: '500' },
-  card: { backgroundColor: colors.bg, borderRadius: radius.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  search: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.card,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.md,
+    height: 48,
+  },
+  searchInput: { flex: 1, fontSize: font.md, color: colors.text },
+  chip: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.pill,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  chipText: { fontSize: font.sm, fontWeight: '600' },
+  card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.lg, ...shadow },
+  badge: { paddingHorizontal: spacing.sm, paddingVertical: 3, borderRadius: radius.pill, alignSelf: 'flex-start' },
+  badgeText: { fontSize: font.xs, fontWeight: '800' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg },
+  emptyIcon: {
+    width: 72, height: 72, borderRadius: 36, backgroundColor: colors.primarySoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
   row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: spacing.xs },
   rowText: { fontSize: font.md, color: colors.text },
-  section: { fontSize: font.lg, fontWeight: '700', color: colors.text, marginTop: spacing.lg, marginBottom: spacing.sm },
-  radioRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.sm },
+  rowBold: { fontWeight: '800', fontSize: font.lg },
+  sectionRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    marginTop: spacing.xl, marginBottom: spacing.md,
+  },
+  section: { fontSize: font.xl, fontWeight: '800', color: colors.text },
+  radioRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.md },
   radio: {
     width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center',

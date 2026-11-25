@@ -3,7 +3,7 @@ import './globals.css';
 import { SessionProvider } from '@/lib/session';
 
 export const metadata: Metadata = {
-  title: 'Marketplace — админка',
+  title: 'TDKFOOD — админка',
   description: 'Управление магазинами, заказами и курьерами',
 };
 

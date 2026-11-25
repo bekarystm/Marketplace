@@ -36,7 +36,8 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-sm space-y-4">
-        <h1 className="text-xl font-bold">Вход в админку</h1>
+        <div className="text-center text-3xl font-black tracking-wide"><span className="text-accent">TDK</span><span className="text-green-700">FOOD</span></div>
+        <h1 className="text-center text-lg font-bold">Вход в админку</h1>
         {!normalized ? (
           <>
             <Field label="Номер телефона" hint="Код придёт в WhatsApp">

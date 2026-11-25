@@ -111,7 +111,7 @@ export default function OrderScreen() {
       <Text style={styles.store}>{order.store?.name}</Text>
 
       {order.status === 'awaiting_payment' ? (
-        <Button style={{ marginTop: spacing.md }} title={`${t('orders.payNow')} ${formatMoney(order.total)}`} onPress={pay} />
+        <Button variant="accent" icon="card" style={{ marginTop: spacing.md }} title={`${t('orders.payNow')} ${formatMoney(order.total)}`} onPress={pay} />
       ) : null}
 
       <Card style={{ marginTop: spacing.lg }}>
@@ -126,9 +126,9 @@ export default function OrderScreen() {
       ) : null}
 
       <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg }}>
-        <Button style={{ flex: 1 }} variant="secondary" title={`💬 ${t('orders.chat')}`} onPress={() => router.push(`/chat/${order.id}`)} />
+        <Button style={{ flex: 1 }} variant="secondary" icon="chatbubbles-outline" title={t('orders.chat')} onPress={() => router.push(`/chat/${order.id}`)} />
         {order.store?.phone ? (
-          <Button style={{ flex: 1 }} variant="secondary" title="📞" onPress={() => Linking.openURL(`tel:${order.store!.phone}`)} />
+          <Button style={{ flex: 1 }} variant="secondary" icon="call-outline" title={order.store!.phone!} onPress={() => Linking.openURL(`tel:${order.store!.phone}`)} />
         ) : null}
       </View>
 

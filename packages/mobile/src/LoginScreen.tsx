@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-na
 import { formatPhone, normalizeKzPhone } from '@marketplace/shared';
 import { supabase } from './supabase';
 import { useI18n } from './i18n';
-import { Button, TextField } from './ui';
+import { Button, Logo, TextField } from './ui';
 import { colors, font, spacing } from './theme';
 
 export function LoginScreen({ onDone }: { onDone: () => void }) {
@@ -57,6 +57,9 @@ export function LoginScreen({ onDone }: { onDone: () => void }) {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
+      <View style={styles.brand}>
+        <Logo size={40} />
+      </View>
       {step === 'phone' && (
         <View style={styles.form}>
           <Text style={styles.title}>{t('auth.phoneLabel')}</Text>
@@ -111,6 +114,7 @@ export function LoginScreen({ onDone }: { onDone: () => void }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg, padding: spacing.xl },
+  brand: { alignItems: 'center', marginTop: spacing.xl },
   form: { gap: spacing.lg, marginTop: spacing.xl },
   title: { fontSize: font.xxl, fontWeight: '700', color: colors.text },
   hint: { fontSize: font.md, color: colors.textMuted },

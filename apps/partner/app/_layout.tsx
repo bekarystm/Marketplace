@@ -43,8 +43,17 @@ function Gate() {
     );
   }
   return (
-    <Stack screenOptions={{ headerBackTitle: t('common.back'), contentStyle: { backgroundColor: colors.bg } }}>
-      <Stack.Screen name="index" options={{ title: 'Marketplace Партнёр' }} />
+    <Stack
+      screenOptions={{
+        headerBackTitle: t('common.back'),
+        headerTintColor: colors.text,
+        headerStyle: { backgroundColor: colors.bg },
+        headerShadowVisible: false,
+        headerTitleStyle: { fontWeight: '800', color: colors.text },
+        contentStyle: { backgroundColor: colors.bg },
+      }}
+    >
+      <Stack.Screen name="index" options={{ title: 'TDKFOOD Партнёр' }} />
       <Stack.Screen name="courier/apply" options={{ title: t('courier.apply') }} />
       <Stack.Screen name="courier/index" options={{ title: t('partner.roleCourier') }} />
       <Stack.Screen name="courier/order/[id]" options={{ title: '' }} />

@@ -63,7 +63,7 @@ export default function PickerOrder() {
           <Text style={styles.link} onPress={() => Linking.openURL(`tel:${order.contact_phone}`)}>{formatPhone(order.contact_phone)}</Text>
           <Text style={styles.muted}>{t('checkout.substitution')}: {t(`substitution.${order.substitution_policy}` as const)}</Text>
           {order.comment ? <Text style={styles.muted}>💬 {order.comment}</Text> : null}
-          <Button variant="secondary" title={`💬 ${t('orders.chat')}`} onPress={() => router.push(`/chat/${order.id}`)} />
+          <Button variant="secondary" icon="chatbubbles-outline" title={t('orders.chat')} onPress={() => router.push(`/chat/${order.id}`)} />
         </Card>
 
         {items.map((item) => (

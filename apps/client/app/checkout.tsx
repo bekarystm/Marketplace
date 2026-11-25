@@ -94,8 +94,8 @@ export default function Checkout() {
 
       <SectionTitle>{t('checkout.payment')}</SectionTitle>
       <Card>
-        <RadioRow label={t('checkout.cash')} selected={payment === 'cash'} onPress={() => setPayment('cash')} />
-        <RadioRow label={t('checkout.card')} selected={payment === 'card'} onPress={() => setPayment('card')} />
+        <RadioRow icon="cash-outline" label={t('checkout.cash')} selected={payment === 'cash'} onPress={() => setPayment('cash')} />
+        <RadioRow icon="card-outline" label={t('checkout.card')} selected={payment === 'card'} onPress={() => setPayment('card')} />
       </Card>
 
       <SectionTitle>{t('checkout.substitution')}</SectionTitle>
@@ -136,6 +136,7 @@ export default function Checkout() {
       ) : null}
 
       <Button
+        variant="accent"
         style={{ marginTop: spacing.lg }}
         title={t('checkout.place', { amount: formatMoney(totals?.total ?? 0) })}
         disabled={!address || !totals?.canCheckout}

@@ -48,7 +48,7 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex min-h-screen">
       <aside className="hidden w-56 shrink-0 flex-col border-r border-stone-200 bg-white p-4 md:flex">
-        <div className="mb-6 px-2 text-lg font-extrabold text-green-700">Marketplace</div>
+        <div className="mb-6 px-2 text-xl font-black tracking-wide"><span className="text-accent">TDK</span><span className="text-green-700">FOOD</span></div>
         <nav className="flex flex-1 flex-col gap-1">
           {nav.map((n) => {
             const active = n.href === '/' ? pathname === '/' : pathname.startsWith(n.href);

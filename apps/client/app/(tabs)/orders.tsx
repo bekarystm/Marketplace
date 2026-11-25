@@ -4,7 +4,7 @@ import { formatMoney, isActive } from '@marketplace/shared';
 import { useOrders } from '../../src/lib/api';
 import { useI18n } from '@marketplace/mobile';
 import { useAuth } from '@marketplace/mobile';
-import { Button, EmptyState, Loading } from '@marketplace/mobile';
+import { Button, EmptyState, Loading, shadow } from '@marketplace/mobile';
 import { colors, font, radius, spacing } from '@marketplace/mobile';
 
 export default function Orders() {
@@ -22,7 +22,7 @@ export default function Orders() {
       keyExtractor={(o) => o.id}
       contentContainerStyle={{ padding: spacing.lg, gap: spacing.md, flexGrow: 1 }}
       refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => { refetch(); }} />}
-      ListEmptyComponent={isLoading ? <Loading /> : <EmptyState title={t('orders.empty')} />}
+      ListEmptyComponent={isLoading ? <Loading /> : <EmptyState icon="receipt-outline" title={t('orders.empty')} />}
       renderItem={({ item }) => (
         <Pressable style={styles.card} onPress={() => router.push(`/order/${item.id}`)}>
           <View style={styles.row}>
@@ -47,7 +47,7 @@ export default function Orders() {
 }
 
 const styles = StyleSheet.create({
-  card: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: spacing.lg, gap: spacing.xs },
+  card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.lg, gap: spacing.xs, ...shadow },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   title: { fontSize: font.lg, fontWeight: '700', color: colors.text },
   total: { fontSize: font.lg, fontWeight: '700', color: colors.text },

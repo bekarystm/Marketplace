@@ -4,7 +4,7 @@ import { useProducts } from '../../src/lib/api';
 import { useI18n } from '@marketplace/mobile';
 import { useCartControls } from '../../src/lib/hooks';
 import { ProductCard } from '../../src/components/ProductCard';
-import { EmptyState, Loading, TextField } from '@marketplace/mobile';
+import { EmptyState, Loading, SearchField, colors } from '@marketplace/mobile';
 import { spacing } from '@marketplace/mobile';
 
 export default function Search() {
@@ -19,9 +19,9 @@ export default function Search() {
   const { quantityOf, change } = useCartControls();
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={{ padding: spacing.lg, paddingBottom: 0 }}>
-        <TextField value={query} onChangeText={setQuery} placeholder={t('common.search')} autoFocus clearButtonMode="while-editing" />
+        <SearchField value={query} onChangeText={setQuery} placeholder={t('common.search')} autoFocus clearButtonMode="while-editing" />
       </View>
       <FlatList
         data={debounced.trim().length >= 2 ? data ?? [] : []}
