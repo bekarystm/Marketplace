@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "name": "Marketplace Партнёр",
+    "slug": "marketplace-partner",
+    "scheme": "marketplace-partner",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "kz.marketplace.partner",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Чтобы показывать заказы рядом и передавать клиенту, где находится курьер",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Чтобы клиент видел курьера на карте, даже когда приложение свёрнуто",
+        "NSCameraUsageDescription": "Чтобы сфотографировать удостоверение личности",
+        "NSPhotoLibraryUsageDescription": "Чтобы выбрать фото удостоверения",
+        "UIBackgroundModes": ["location"]
+      }
+    },
+    "android": {
+      "package": "kz.marketplace.partner",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION",
+        "CAMERA"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": { "favicon": "./assets/favicon.png" },
+    "plugins": [
+      "expo-router",
+      "expo-image",
+      "expo-localization",
+      "expo-web-browser",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Чтобы показывать заказы рядом и передавать клиенту, где находится курьер",
+          "locationAlwaysAndWhenInUsePermission": "Чтобы клиент видел курьера на карте, даже когда приложение свёрнуто",
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        { "cameraPermission": "Чтобы сфотографировать удостоверение личности" }
+      ],
+      "expo-notifications"
+    ]
+  }
+}

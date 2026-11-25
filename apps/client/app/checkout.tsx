@@ -9,11 +9,11 @@ import {
   type SubstitutionPolicy,
 } from '@marketplace/shared';
 import { checkPromo, useAppSettings, usePlaceOrder, useStore } from '../src/lib/api';
-import { useI18n } from '../src/lib/i18n';
-import { useAuth } from '../src/lib/auth';
+import { useI18n } from '@marketplace/mobile';
+import { useAuth } from '@marketplace/mobile';
 import { useCartControls, useSelectedAddress } from '../src/lib/hooks';
-import { Button, Card, RadioRow, Row, SectionTitle, TextField } from '../src/components/ui';
-import { colors, font, spacing } from '../src/lib/theme';
+import { Button, Card, RadioRow, Row, SectionTitle, TextField } from '@marketplace/mobile';
+import { colors, font, spacing } from '@marketplace/mobile';
 
 const POLICIES: SubstitutionPolicy[] = ['contact_me', 'replace_similar', 'remove'];
 

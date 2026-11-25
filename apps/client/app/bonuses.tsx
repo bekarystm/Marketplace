@@ -1,11 +1,11 @@
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { formatMoney } from '@marketplace/shared';
-import { supabase } from '../src/lib/supabase';
-import { useAuth } from '../src/lib/auth';
-import { useI18n } from '../src/lib/i18n';
-import { EmptyState } from '../src/components/ui';
-import { colors, font, spacing } from '../src/lib/theme';
+import { supabase } from '@marketplace/mobile';
+import { useAuth } from '@marketplace/mobile';
+import { useI18n } from '@marketplace/mobile';
+import { EmptyState } from '@marketplace/mobile';
+import { colors, font, spacing } from '@marketplace/mobile';
 
 const REASONS: Record<string, { ru: string; kk: string }> = {
   order_earn: { ru: 'Начислено за заказ', kk: 'Тапсырыс үшін есептелді' },

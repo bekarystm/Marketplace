@@ -3,11 +3,11 @@ import { FlatList, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { calcCartTotals, formatMoney, localized } from '@marketplace/shared';
 import { useCategories, useProducts, useStore } from '../../src/lib/api';
-import { useI18n } from '../../src/lib/i18n';
+import { useI18n } from '@marketplace/mobile';
 import { useCartControls } from '../../src/lib/hooks';
 import { ProductCard } from '../../src/components/ProductCard';
-import { Button, Chip, EmptyState, Loading, TextField } from '../../src/components/ui';
-import { colors, font, spacing } from '../../src/lib/theme';
+import { Button, Chip, EmptyState, Loading, TextField } from '@marketplace/mobile';
+import { colors, font, spacing } from '@marketplace/mobile';
 
 export default function StoreScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

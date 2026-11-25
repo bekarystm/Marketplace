@@ -2,10 +2,10 @@ import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'rea
 import { router } from 'expo-router';
 import { formatMoney, isActive } from '@marketplace/shared';
 import { useOrders } from '../../src/lib/api';
-import { useI18n } from '../../src/lib/i18n';
-import { useAuth } from '../../src/lib/auth';
-import { Button, EmptyState, Loading } from '../../src/components/ui';
-import { colors, font, radius, spacing } from '../../src/lib/theme';
+import { useI18n } from '@marketplace/mobile';
+import { useAuth } from '@marketplace/mobile';
+import { Button, EmptyState, Loading } from '@marketplace/mobile';
+import { colors, font, radius, spacing } from '@marketplace/mobile';
 
 export default function Orders() {
   const { t, locale } = useI18n();

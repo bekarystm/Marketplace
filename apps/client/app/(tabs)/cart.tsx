@@ -4,12 +4,12 @@ import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { calcCartTotals, formatMoney, localized } from '@marketplace/shared';
 import { useClearStoreCart, useStores, type CartRow } from '../../src/lib/api';
-import { useI18n } from '../../src/lib/i18n';
-import { useAuth } from '../../src/lib/auth';
+import { useI18n } from '@marketplace/mobile';
+import { useAuth } from '@marketplace/mobile';
 import { useCartControls } from '../../src/lib/hooks';
-import { QuantityStepper } from '../../src/components/QuantityStepper';
-import { Button, Card, EmptyState, Row } from '../../src/components/ui';
-import { colors, font, radius, spacing } from '../../src/lib/theme';
+import { QuantityStepper } from '@marketplace/mobile';
+import { Button, Card, EmptyState, Row } from '@marketplace/mobile';
+import { colors, font, radius, spacing } from '@marketplace/mobile';
 
 export default function Cart() {
   const { t, locale } = useI18n();

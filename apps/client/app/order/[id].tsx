@@ -17,12 +17,12 @@ import {
   useReview,
   useSubmitReview,
 } from '../../src/lib/api';
-import { supabase } from '../../src/lib/supabase';
-import { useI18n } from '../../src/lib/i18n';
-import { OsmMap, type MapMarker } from '../../src/components/OsmMap';
-import { StatusSteps } from '../../src/components/StatusSteps';
-import { Button, Card, Loading, Row, SectionTitle } from '../../src/components/ui';
-import { colors, font, spacing } from '../../src/lib/theme';
+import { supabase } from '@marketplace/mobile';
+import { useI18n } from '@marketplace/mobile';
+import { OsmMap, type MapMarker } from '@marketplace/mobile';
+import { StatusSteps } from '@marketplace/mobile';
+import { Button, Card, Loading, Row, SectionTitle } from '@marketplace/mobile';
+import { colors, font, spacing } from '@marketplace/mobile';
 
 function Stars({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (

@@ -1,10 +1,10 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { formatMoney, formatPhone, LOCALES } from '@marketplace/shared';
-import { useAuth } from '../../src/lib/auth';
-import { useI18n } from '../../src/lib/i18n';
-import { Button, Chip } from '../../src/components/ui';
-import { colors, font, radius, spacing } from '../../src/lib/theme';
+import { useAuth } from '@marketplace/mobile';
+import { useI18n } from '@marketplace/mobile';
+import { Button, Chip } from '@marketplace/mobile';
+import { colors, font, radius, spacing } from '@marketplace/mobile';
 
 export default function Profile() {
   const { t, locale, setLocale } = useI18n();

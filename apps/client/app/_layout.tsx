@@ -3,10 +3,10 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { AuthProvider, useAuth } from '../src/lib/auth';
-import { I18nProvider, useI18n } from '../src/lib/i18n';
-import { registerPushToken } from '../src/lib/push';
-import { colors } from '../src/lib/theme';
+import { AuthProvider, useAuth } from '@marketplace/mobile';
+import { I18nProvider, useI18n } from '@marketplace/mobile';
+import { registerPushToken } from '@marketplace/mobile';
+import { colors } from '@marketplace/mobile';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },

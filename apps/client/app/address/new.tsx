@@ -5,11 +5,11 @@ import * as Location from 'expo-location';
 import { CITY, errorMessage } from '@marketplace/shared';
 import { useSaveAddress } from '../../src/lib/api';
 import { useSelectedAddress } from '../../src/lib/hooks';
-import { useI18n } from '../../src/lib/i18n';
-import { reverseGeocode } from '../../src/lib/geocode';
-import { OsmMap } from '../../src/components/OsmMap';
-import { Button, TextField } from '../../src/components/ui';
-import { spacing } from '../../src/lib/theme';
+import { useI18n } from '@marketplace/mobile';
+import { reverseGeocode } from '@marketplace/mobile';
+import { OsmMap } from '@marketplace/mobile';
+import { Button, TextField } from '@marketplace/mobile';
+import { spacing } from '@marketplace/mobile';
 
 export default function NewAddress() {
   const { t, locale } = useI18n();

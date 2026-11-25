@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import { useAuth } from './auth';
+import { useAuth } from '@marketplace/mobile';
 import { useAddresses, useSetCartQuantity, useCart } from './api';
 import type { Product } from '@marketplace/shared';
 

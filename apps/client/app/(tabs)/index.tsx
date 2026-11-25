@@ -1,12 +1,12 @@
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useStores } from '../../src/lib/api';
-import { useI18n } from '../../src/lib/i18n';
+import { useI18n } from '@marketplace/mobile';
 import { useSelectedAddress } from '../../src/lib/hooks';
-import { useAuth } from '../../src/lib/auth';
+import { useAuth } from '@marketplace/mobile';
 import { StoreCard } from '../../src/components/StoreCard';
-import { EmptyState, Loading } from '../../src/components/ui';
-import { colors, font, spacing } from '../../src/lib/theme';
+import { EmptyState, Loading } from '@marketplace/mobile';
+import { colors, font, spacing } from '@marketplace/mobile';
 
 export default function Home() {
   const { t } = useI18n();

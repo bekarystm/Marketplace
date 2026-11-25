@@ -1,9 +1,9 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { formatMoney, localized, unitLabel, type Product } from '@marketplace/shared';
-import { colors, font, radius, spacing } from '../lib/theme';
-import { useI18n } from '../lib/i18n';
-import { QuantityStepper } from './QuantityStepper';
+import { colors, font, radius, spacing } from '@marketplace/mobile';
+import { useI18n } from '@marketplace/mobile';
+import { QuantityStepper } from '@marketplace/mobile';
 
 export function ProductCard({
   product,

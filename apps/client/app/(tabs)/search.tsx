@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { useProducts } from '../../src/lib/api';
-import { useI18n } from '../../src/lib/i18n';
+import { useI18n } from '@marketplace/mobile';
 import { useCartControls } from '../../src/lib/hooks';
 import { ProductCard } from '../../src/components/ProductCard';
-import { EmptyState, Loading, TextField } from '../../src/components/ui';
-import { spacing } from '../../src/lib/theme';
+import { EmptyState, Loading, TextField } from '@marketplace/mobile';
+import { spacing } from '@marketplace/mobile';
 
 export default function Search() {
   const { t } = useI18n();

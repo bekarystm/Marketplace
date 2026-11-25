@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { ORDER_PROGRESS, progressIndex, type OrderStatus } from '@marketplace/shared';
-import { colors, font, spacing } from '../lib/theme';
-import { useI18n } from '../lib/i18n';
+import { colors, font, spacing } from './theme';
+import { useI18n } from './i18n';
 
 export function StatusSteps({ status }: { status: OrderStatus }) {
   const { t } = useI18n();

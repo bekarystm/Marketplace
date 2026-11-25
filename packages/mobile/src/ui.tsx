@@ -10,7 +10,7 @@ import {
   type TextInputProps,
   type ViewStyle,
 } from 'react-native';
-import { colors, font, radius, spacing } from '../lib/theme';
+import { colors, font, radius, spacing } from './theme';
 
 export function Button({
   title,

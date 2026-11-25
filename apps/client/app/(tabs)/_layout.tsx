@@ -1,8 +1,8 @@
 import { Tabs } from 'expo-router';
 import { Text } from 'react-native';
-import { useI18n } from '../../src/lib/i18n';
+import { useI18n } from '@marketplace/mobile';
 import { useCart } from '../../src/lib/api';
-import { colors } from '../../src/lib/theme';
+import { colors } from '@marketplace/mobile';
 
 const icon = (emoji: string) => ({ focused }: { focused: boolean }) => (
   <Text style={{ fontSize: 22, opacity: focused ? 1 : 0.5 }}>{emoji}</Text>

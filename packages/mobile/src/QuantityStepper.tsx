@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { formatQuantity, roundToStep, type Product } from '@marketplace/shared';
-import { colors, font, radius, spacing } from '../lib/theme';
-import { useI18n } from '../lib/i18n';
+import { colors, font, radius, spacing } from './theme';
+import { useI18n } from './i18n';
 
 export function QuantityStepper({
   product,

@@ -2,9 +2,9 @@ import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native
 import { router } from 'expo-router';
 import { useDeleteAddress } from '../src/lib/api';
 import { useSelectedAddress } from '../src/lib/hooks';
-import { useI18n } from '../src/lib/i18n';
-import { Button, EmptyState } from '../src/components/ui';
-import { colors, font, radius, spacing } from '../src/lib/theme';
+import { useI18n } from '@marketplace/mobile';
+import { Button, EmptyState } from '@marketplace/mobile';
+import { colors, font, radius, spacing } from '@marketplace/mobile';
 
 export default function Addresses() {
   const { t } = useI18n();

@@ -14,7 +14,7 @@ const WebView = RNWebView as unknown as ComponentType<{
   scrollEnabled?: boolean;
   style?: StyleProp<ViewStyle>;
 }>;
-import { colors } from '../lib/theme';
+import { colors } from './theme';
 
 export interface MapMarker {
   id: string;

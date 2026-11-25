@@ -1,9 +1,9 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { formatMoney, type Store } from '@marketplace/shared';
-import { colors, font, radius, spacing } from '../lib/theme';
-import { useI18n } from '../lib/i18n';
-import { isStoreOpen } from '../lib/hours';
+import { colors, font, radius, spacing } from '@marketplace/mobile';
+import { useI18n } from '@marketplace/mobile';
+import { isStoreOpen } from '@marketplace/mobile';
 
 export function StoreCard({ store, onPress }: { store: Store; onPress: () => void }) {
   const { t } = useI18n();
