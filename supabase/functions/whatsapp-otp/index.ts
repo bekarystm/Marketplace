@@ -14,7 +14,8 @@ const json = (body: unknown, status = 200) =>
 
 Deno.serve(async (req) => {
   const payload = await req.text();
-  const secret = (Deno.env.get('SEND_SMS_HOOK_SECRET') ?? '').replace('v1,whsec_', '');
+  const env = (k: string) => (Deno.env.get(k) ?? '').trim();
+  const secret = env('SEND_SMS_HOOK_SECRET').replace('v1,whsec_', '');
   let event: { user: { phone: string }; sms: { otp: string } };
   try {
     event = new Webhook(secret).verify(payload, Object.fromEntries(req.headers)) as typeof event;
@@ -24,8 +25,8 @@ Deno.serve(async (req) => {
 
   const phone = event.user.phone.replace(/\D/g, '');
   const code = event.sms.otp;
-  const token = Deno.env.get('WHATSAPP_TOKEN');
-  const phoneNumberId = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID');
+  const token = env('WHATSAPP_TOKEN');
+  const phoneNumberId = env('WHATSAPP_PHONE_NUMBER_ID');
   if (!token || !phoneNumberId) {
     return json({ error: { http_code: 500, message: 'WhatsApp provider is not configured' } }, 500);
   }
@@ -38,8 +39,8 @@ Deno.serve(async (req) => {
       to: phone,
       type: 'template',
       template: {
-        name: Deno.env.get('WHATSAPP_TEMPLATE') ?? 'login_code',
-        language: { code: Deno.env.get('WHATSAPP_TEMPLATE_LANG') ?? 'ru' },
+        name: env('WHATSAPP_TEMPLATE') || 'login_code',
+        language: { code: env('WHATSAPP_TEMPLATE_LANG') || 'ru' },
         components: [
           { type: 'body', parameters: [{ type: 'text', text: code }] },
           { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: code }] },
