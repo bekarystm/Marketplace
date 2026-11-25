@@ -7,6 +7,7 @@ import { useClearStoreCart, useStores, type CartRow } from '../../src/lib/api';
 import { useI18n } from '@marketplace/mobile';
 import { useAuth } from '@marketplace/mobile';
 import { useCartControls } from '../../src/lib/hooks';
+import { Icon } from '@marketplace/mobile';
 import { QuantityStepper } from '@marketplace/mobile';
 import { Button, Card, EmptyState, Row } from '@marketplace/mobile';
 import { colors, font, radius, spacing } from '@marketplace/mobile';
@@ -61,7 +62,7 @@ export default function Cart() {
                 <View style={styles.thumb}>
                   {row.product.image_urls[0] ? (
                     <Image source={{ uri: row.product.image_urls[0] }} style={{ width: '100%', height: '100%' }} contentFit="contain" />
-                  ) : <Text>🛒</Text>}
+                  ) : <Icon name="basket-outline" size={24} color={colors.textMuted} />}
                 </View>
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text style={styles.name} numberOfLines={2}>{localized(row.product, 'name', locale)}</Text>

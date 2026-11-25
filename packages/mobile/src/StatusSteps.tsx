@@ -5,6 +5,9 @@ import { useI18n } from './i18n';
 
 export function StatusSteps({ status }: { status: OrderStatus }) {
   const { t } = useI18n();
+  if (status === 'awaiting_payment') {
+    return <Text style={[styles.label, { color: colors.warning, fontWeight: '700' }]}>{t('status.awaiting_payment')}</Text>;
+  }
   if (status === 'cancelled') {
     return <Text style={[styles.label, { color: colors.danger, fontWeight: '700' }]}>{t('status.cancelled')}</Text>;
   }

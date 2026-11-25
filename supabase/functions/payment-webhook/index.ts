@@ -1,36 +1,35 @@
 // Payment confirmations.
-//  - Sandbox (PAYMENT_PROVIDER=test): GET shows a fake checkout page, POST confirms the payment.
+//  - Sandbox (PAYMENT_PROVIDER=test): the app POSTs the signed confirm_url returned by
+//    create-payment; the signature binds order id and amount.
 //  - Real provider callbacks are verified and handled here once acquiring is connected.
-import { adminClient, hmacHex, safeEqual } from '../_shared/admin.ts';
+import { adminClient, hmacHex, json, safeEqual } from '../_shared/admin.ts';
 
-const html = (body: string, status = 200) =>
-  new Response(
-    `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Оплата</title><style>body{font-family:system-ui;padding:32px;max-width:420px;margin:auto;text-align:center}
-button{background:#16a34a;color:#fff;border:0;border-radius:12px;padding:14px 24px;font-size:17px;width:100%}</style></head>
-<body>${body}</body></html>`,
-    { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } },
-  );
+const cors = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   const url = new URL(req.url);
-  if (url.searchParams.get('test') !== '1' || (Deno.env.get('PAYMENT_PROVIDER') ?? '').trim().toLowerCase() !== 'test') {
-    return new Response('not found', { status: 404 });
+  const env = (k: string) => (Deno.env.get(k) ?? '').trim();
+  if (url.searchParams.get('test') !== '1' || env('PAYMENT_PROVIDER').toLowerCase() !== 'test') {
+    return json({ error: 'not_found' }, 404);
   }
-  const secret = (Deno.env.get('PAYMENT_TEST_SECRET') ?? '').trim();
+  if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
+
+  const secret = env('PAYMENT_TEST_SECRET');
   const orderId = url.searchParams.get('order') ?? '';
   const amount = url.searchParams.get('amount') ?? '';
   const sig = url.searchParams.get('sig') ?? '';
   const expected = secret ? await hmacHex(secret, `${orderId}:${amount}`) : '';
-  if (!expected || !safeEqual(sig, expected)) return html('<h2>Ссылка недействительна</h2>', 403);
-
-  if (req.method === 'GET') {
-    return html(`<h2>Тестовая оплата</h2><p>Сумма: <b>${Number(amount).toLocaleString('ru-RU')} ₸</b></p>
-      <form method="POST"><button type="submit">Оплатить</button></form>
-      <p style="color:#888;font-size:13px">Это песочница. Реальные деньги не списываются.</p>`);
-  }
+  if (!expected || !safeEqual(sig, expected)) return json({ error: 'invalid_signature' }, 403);
 
   const db = adminClient();
+  const { data: order } = await db.from('orders').select('status, payment_status').eq('id', orderId).maybeSingle();
+  if (!order) return json({ error: 'order_not_found' }, 404);
+  if (order.payment_status === 'paid') return json({ ok: true, already_paid: true });
+
   const { error } = await db.rpc('confirm_card_payment', {
     p_order_id: orderId,
     p_provider: 'test',
@@ -38,6 +37,6 @@ Deno.serve(async (req) => {
     p_amount: Number(amount),
     p_payload: { sandbox: true },
   });
-  if (error) return html(`<h2>Ошибка</h2><p>${error.message}</p>`, 500);
-  return html('<h2>✅ Оплачено</h2><p>Можно вернуться в приложение.</p>');
+  if (error) return json({ error: error.message }, 500);
+  return json({ ok: true });
 });

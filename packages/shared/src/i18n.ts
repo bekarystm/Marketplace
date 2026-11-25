@@ -129,6 +129,8 @@ const ru = {
   'orders.approve': 'Согласен',
   'orders.reject': 'Не нужно',
   'orders.payNow': 'Оплатить',
+  'orders.testPaymentTitle': 'Тестовая оплата',
+  'orders.testPaymentBody': 'Сумма {amount}. Это тестовый режим — деньги не списываются.',
 
   // order status
   'status.awaiting_payment': 'Ожидает оплаты',
@@ -318,6 +320,8 @@ const kk: Record<TranslationKey, string> = {
   'orders.approve': 'Келісемін',
   'orders.reject': 'Керек емес',
   'orders.payNow': 'Төлеу',
+  'orders.testPaymentTitle': 'Сынақ төлемі',
+  'orders.testPaymentBody': 'Сомасы {amount}. Бұл сынақ режимі — ақша есептен шығарылмайды.',
 
   'status.awaiting_payment': 'Төлемді күтуде',
   'status.placed': 'Рәсімделді',

@@ -118,7 +118,7 @@ export default function Checkout() {
           <Text style={{ fontSize: font.md, flex: 1 }}>
             {t('checkout.useBonus', { amount: formatMoney(profile?.bonus_balance) })}
           </Text>
-          <Switch value={useBonus} onValueChange={setUseBonus} />
+          <Switch value={useBonus} onValueChange={setUseBonus} trackColor={{ true: colors.primary, false: colors.border }} thumbColor={colors.white} />
         </View>
       ) : null}
 

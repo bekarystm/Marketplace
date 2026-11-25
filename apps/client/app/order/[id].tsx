@@ -39,7 +39,7 @@ function Stars({ value, onChange }: { value: number; onChange: (v: number) => vo
 export default function OrderScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, locale } = useI18n();
-  const { data, isLoading } = useOrder(id);
+  const { data, isLoading, refetch } = useOrder(id);
   const cancel = useCancelOrder();
   const respond = useRespondReplacement(id!);
   const { data: review } = useReview(data?.order.status === 'delivered' ? id : undefined);
@@ -68,8 +68,24 @@ export default function OrderScreen() {
 
   const pay = async () => {
     const { data: res, error } = await supabase.functions.invoke('create-payment', { body: { order_id: order.id } });
-    if (error || !res?.url) return Alert.alert(t('common.error'), errorMessage(error, locale));
-    await WebBrowser.openBrowserAsync(res.url);
+    if (error || !res) return Alert.alert(t('common.error'), errorMessage(error, locale));
+    if (res.test && res.confirm_url) {
+      // sandbox mode: confirm in-app (no real money)
+      Alert.alert(t('orders.testPaymentTitle'), t('orders.testPaymentBody', { amount: formatMoney(res.amount) }), [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('orders.payNow'),
+          onPress: async () => {
+            const r = await fetch(res.confirm_url, { method: 'POST' }).catch(() => null);
+            if (!r?.ok) return Alert.alert(t('common.error'), t('common.error'));
+            refetch();
+          },
+        },
+      ]);
+      return;
+    }
+    if (res.url) await WebBrowser.openBrowserAsync(res.url);
+    refetch();
   };
 
   const itemLine = (item: OrderItem) => {

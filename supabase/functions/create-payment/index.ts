@@ -32,8 +32,10 @@ Deno.serve(async (req) => {
     if (!secret) return json({ error: 'payment_not_configured' }, 500);
     const amount = String(order.total);
     const sig = await hmacHex(secret, `${order.id}:${amount}`);
-    const url = `${Deno.env.get('SUPABASE_URL')}/functions/v1/payment-webhook?test=1&order=${order.id}&amount=${amount}&sig=${sig}`;
-    return json({ url }, 200);
+    // Supabase serves function responses to browsers as text/plain (no HTML pages),
+    // so the sandbox is confirmed in-app: the client shows a dialog and POSTs confirm_url.
+    const confirm_url = `${Deno.env.get('SUPABASE_URL')}/functions/v1/payment-webhook?test=1&order=${order.id}&amount=${amount}&sig=${sig}`;
+    return json({ test: true, amount: order.total, confirm_url }, 200);
   }
 
   return json({ error: 'payment_provider_not_configured' }, 501);
