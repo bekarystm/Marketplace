@@ -55,7 +55,7 @@ npx eas-cli build --profile development --platform android
 2. **Вход по WhatsApp.** Auth → Providers → Phone: включить. Auth → Hooks → *Send SMS hook*: указать HTTPS-функцию `whatsapp-otp` и сохранить секрет. Затем задать секреты функции:
    `SEND_SMS_HOOK_SECRET`, `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TEMPLATE`, `WHATSAPP_TEMPLATE_LANG`.
    Для этого нужен WhatsApp Business (Meta) с одобренным шаблоном authentication.
-3. **Пуши.** Database → Webhooks: на `INSERT` в `public.notifications` вызывать функцию `send-push` с заголовком `x-webhook-secret`. Секреты функции: `PUSH_WEBHOOK_SECRET` (и по желанию `EXPO_ACCESS_TOKEN`).
+3. **Пуши.** Миграция `push_webhook` отправляет каждое новое уведомление в функцию `send-push` через pg_net. Один и тот же секрет должен лежать в двух местах: в секретах функции `PUSH_WEBHOOK_SECRET` и в Vault под именем `push_webhook_secret` (`select vault.create_secret('<значение>', 'push_webhook_secret');`). По желанию можно добавить `EXPO_ACCESS_TOKEN`.
 4. **Оплата картой.** Пока работает тестовый режим (`PAYMENT_PROVIDER=test`, `PAYMENT_TEST_SECRET`). Боевой эквайринг (ioka / Freedom Pay / CloudPayments) подключается в `create-payment` и `payment-webhook`, когда будет договор (нужен ИП или ТОО).
 5. **Первый администратор.** Войти в админку по своему номеру, затем один раз выполнить в SQL Editor:
    `update public.profiles set role = 'admin' where phone = '+77XXXXXXXXX';`

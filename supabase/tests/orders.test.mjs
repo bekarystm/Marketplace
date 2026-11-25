@@ -344,3 +344,17 @@ test('notifications are generated for order events', async () => {
   await rejects(as(db, u.client, `update public.notifications set title = 'x'`), 'permission denied');
   await as(db, u.client, `update public.notifications set read_at = now()`);
 });
+
+test('push webhook: notifications are forwarded to send-push only when the secret is configured', async () => {
+  const before = (await db.query(`select count(*)::int n from net.calls`)).rows[0].n;
+  await db.query(`select public._notify($1, 'no secret yet', null, '{}')`, [u.client]);
+  assert.equal((await db.query(`select count(*)::int n from net.calls`)).rows[0].n, before, 'skipped without secret');
+
+  await db.query(`insert into vault.decrypted_secrets values ('push_webhook_secret', 'shh')`);
+  await db.query(`select public._notify($1, 'Заказ', 'Курьер в пути', '{"order_id":"x"}')`, [u.client]);
+  const { rows } = await db.query(`select url, headers, body from net.calls order by id desc limit 1`);
+  assert.match(rows[0].url, /\/functions\/v1\/send-push$/);
+  assert.equal(rows[0].headers['x-webhook-secret'], 'shh');
+  assert.equal(rows[0].body.type, 'INSERT');
+  assert.equal(rows[0].body.record.body, 'Курьер в пути');
+});

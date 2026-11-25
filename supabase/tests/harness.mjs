@@ -67,6 +67,14 @@ create function storage.foldername(name text) returns text[] language sql immuta
   select (string_to_array(name, '/'))[1:array_length(string_to_array(name, '/'), 1) - 1]
 $$;
 
+-- ---- vault & pg_net stand-ins ----
+create schema vault;
+create table vault.decrypted_secrets (name text primary key, decrypted_secret text);
+create schema net;
+create table net.calls (id bigserial primary key, url text, headers jsonb, body jsonb);
+create function net.http_post(url text, headers jsonb, body jsonb) returns bigint
+  language sql as $$ insert into net.calls (url, headers, body) values (url, headers, body) returning id $$;
+
 -- ---- realtime ----
 create publication supabase_realtime;
 
@@ -79,7 +87,9 @@ grant usage on schema public to anon, authenticated, service_role;
 
 function prepareMigration(sql) {
   // PostGIS is stubbed above; pg_trgm is real (PGlite contrib)
-  return sql.replace(/create extension if not exists postgis[^;]*;/i, '');
+  return sql
+    .replace(/create extension if not exists postgis[^;]*;/i, '')
+    .replace(/create extension if not exists pg_net[^;]*;/i, '');
 }
 
 export async function createDb() {
