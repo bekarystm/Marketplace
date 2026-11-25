@@ -52,7 +52,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await profileQuery.refetch();
     },
     signOut: async () => {
-      await supabase.auth.signOut();
+      // local scope: signing out of one app must not end the same user's sessions in the other app or on other devices
+      await supabase.auth.signOut({ scope: 'local' });
     },
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

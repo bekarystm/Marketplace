@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View, Pressable } from 'react-native';
 import { useChat } from './chat';
 import { useAuth } from './auth';
+import { useI18n } from './i18n';
 import { Loading } from './ui';
 import { colors, font, radius, spacing } from './theme';
 
@@ -9,7 +10,15 @@ import { colors, font, radius, spacing } from './theme';
 export function ChatScreen({ orderId, support }: { orderId?: string; support?: boolean }) {
   const isSupport = !!support;
   const { userId } = useAuth();
-  const { chat, messages, loading, send } = useChat(isSupport ? { support: true } : { orderId });
+  const { t } = useI18n();
+  const { chat, messages, loading, send, participants } = useChat(isSupport ? { support: true } : { orderId });
+
+  const senderLabel = (senderId: string) => {
+    if (isSupport) return t('chat.support');
+    if (participants?.client_id === senderId) return t('chat.client');
+    if (participants?.courier_id === senderId) return t('chat.courier');
+    return t('chat.store');
+  };
   const [text, setText] = useState('');
   const list = useRef<FlatList>(null);
 
@@ -34,6 +43,7 @@ export function ChatScreen({ orderId, support }: { orderId?: string; support?: b
           const mine = item.sender_id === userId;
           return (
             <View style={[styles.bubble, mine ? styles.mine : styles.theirs]}>
+              {!mine ? <Text style={styles.sender}>{senderLabel(item.sender_id)}</Text> : null}
               <Text style={{ color: mine ? colors.white : colors.text, fontSize: font.md }}>{item.body}</Text>
               <Text style={[styles.time, mine && { color: 'rgba(255,255,255,0.7)' }]}>
                 {new Date(item.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
@@ -65,6 +75,7 @@ const styles = StyleSheet.create({
   bubble: { maxWidth: '80%', padding: spacing.md, borderRadius: radius.lg, gap: 2 },
   mine: { alignSelf: 'flex-end', backgroundColor: colors.primary },
   theirs: { alignSelf: 'flex-start', backgroundColor: colors.surface },
+  sender: { fontSize: 11, fontWeight: '700', color: colors.primary, marginBottom: 2 },
   time: { fontSize: 11, color: colors.textMuted, alignSelf: 'flex-end' },
   inputRow: {
     flexDirection: 'row', gap: spacing.sm, padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.border,

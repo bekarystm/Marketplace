@@ -28,6 +28,18 @@ export default function PickerOrder() {
   const { order, items, client } = data;
   const next = staffNextStatus(order.status);
   const picking = order.status === 'picking';
+  // weighted goods need an actual weight, so "pick all" skips them
+  const quickPickable = items.filter((i) => i.status === 'pending' && i.unit !== 'kg' && i.unit !== 'g');
+  const pickAll = async () => {
+    for (const item of quickPickable) {
+      try {
+        await pick.mutateAsync({ itemId: item.id, status: 'picked' });
+      } catch (e) {
+        onError(e);
+        break;
+      }
+    }
+  };
   const onError = (e: unknown) => Alert.alert(t('common.error'), errorMessage(e, locale));
 
   const nextLabel = next === 'accepted' ? t('picker.accept') : next === 'picking' ? t('picker.startPicking') : t('picker.markReady');
@@ -65,6 +77,10 @@ export default function PickerOrder() {
           {order.comment ? <Text style={styles.muted}>💬 {order.comment}</Text> : null}
           <Button variant="secondary" icon="chatbubbles-outline" title={t('orders.chat')} onPress={() => router.push(`/chat/${order.id}`)} />
         </Card>
+
+        {picking && quickPickable.length > 1 ? (
+          <Button variant="secondary" icon="checkmark-done" title={t('picker.pickAll', { count: quickPickable.length })} onPress={pickAll} loading={pick.isPending} />
+        ) : null}
 
         {items.map((item) => (
           <Card key={item.id} style={{ gap: spacing.sm }}>

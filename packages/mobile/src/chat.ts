@@ -74,5 +74,21 @@ export function useChat(params: { orderId?: string; support?: boolean }) {
       ),
   });
 
-  return { chat: chatQuery.data, messages: messages.data ?? [], loading: chatQuery.isLoading, send };
+  // participants of an order chat, to label who wrote each message
+  const participants = useQuery({
+    queryKey: ['chat_participants', params.orderId],
+    enabled: !!params.orderId,
+    queryFn: async () =>
+      unwrapMaybe(
+        await supabase.from('orders').select('client_id, courier_id').eq('id', params.orderId!).maybeSingle(),
+      ),
+  });
+
+  return {
+    chat: chatQuery.data,
+    messages: messages.data ?? [],
+    loading: chatQuery.isLoading,
+    send,
+    participants: participants.data ?? null,
+  };
 }

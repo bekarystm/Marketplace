@@ -39,7 +39,7 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
       <div className="mx-auto max-w-md p-10 text-center space-y-4">
         <p>У аккаунта {formatPhone(profile?.phone)} нет доступа к админке.</p>
         <p className="text-sm text-stone-500">Доступ есть у администраторов и менеджеров магазинов.</p>
-        <button className="text-green-700 underline" onClick={() => supabase.auth.signOut()}>Выйти</button>
+        <button className="text-green-700 underline" onClick={() => supabase.auth.signOut({ scope: 'local' })}>Выйти</button>
       </div>
     );
   }
@@ -63,7 +63,7 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
         <div className="border-t border-stone-200 pt-3 text-xs text-stone-500">
           <div className="font-medium text-stone-800">{profile?.full_name ?? '—'}</div>
           <div>{formatPhone(profile?.phone)}</div>
-          <button className="mt-2 text-green-700 hover:underline" onClick={() => supabase.auth.signOut()}>Выйти</button>
+          <button className="mt-2 text-green-700 hover:underline" onClick={() => supabase.auth.signOut({ scope: 'local' })}>Выйти</button>
         </div>
       </aside>
       <div className="flex-1">

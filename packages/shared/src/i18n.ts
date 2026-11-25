@@ -202,6 +202,11 @@ const ru = {
   'picker.actualWeight': 'Фактический вес, кг',
   'picker.waitingClient': 'Ждём ответа клиента',
   'picker.chooseReplacement': 'Выберите замену',
+  'picker.pickAll': 'Собрано всё ({count})',
+  'chat.client': 'Клиент',
+  'chat.courier': 'Курьер',
+  'chat.store': 'Магазин',
+  'chat.support': 'Поддержка',
 } as const;
 
 export type TranslationKey = keyof typeof ru;
@@ -392,6 +397,11 @@ const kk: Record<TranslationKey, string> = {
   'picker.actualWeight': 'Нақты салмағы, кг',
   'picker.waitingClient': 'Клиенттің жауабын күтудеміз',
   'picker.chooseReplacement': 'Ауыстыруды таңдаңыз',
+  'picker.pickAll': 'Барлығы жиналды ({count})',
+  'chat.client': 'Клиент',
+  'chat.courier': 'Курьер',
+  'chat.store': 'Дүкен',
+  'chat.support': 'Қолдау қызметі',
 };
 
 const dictionaries: Record<Locale, Record<TranslationKey, string>> = { ru, kk };
