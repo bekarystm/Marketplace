@@ -19,7 +19,7 @@ export default function CouriersPage() {
   }, [filter]);
 
   const review = async (userId: string, status: Status) => {
-    const { error } = await supabase.rpc('admin_review_courier', { p_user_id: userId, p_status: status, p_reason: reason || null });
+    const { error } = await supabase.rpc('admin_review_courier', { p_user_id: userId, p_status: status, p_reason: reason || undefined });
     if (error) alert(error.message);
     setReason('');
     reload();

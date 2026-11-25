@@ -64,8 +64,9 @@ test('anon can browse active stores and products, but not inactive stores', asyn
   assert.deepEqual(stores.map((s) => s.id), [ids.store]);
   const products = await as(db, null, `select count(*)::int as n from public.products`);
   assert.equal(products[0].n, 4);
-  const promos = await as(db, null, `select * from public.promo_codes`);
-  assert.equal(promos.length, 0, 'promo codes must not be listable');
+  await rejects(as(db, null, `select * from public.promo_codes`), 'permission denied');
+  const promos = await as(db, u.client, `select * from public.promo_codes`);
+  assert.equal(promos.length, 0, 'promo codes must not be listable by clients');
 });
 
 test('profile is auto-created and user cannot escalate own role or bonuses', async () => {
@@ -151,8 +152,8 @@ test('other users cannot see the order; store staff can', async () => {
 test('client cannot accept own order; direct order updates are blocked', async () => {
   await rejects(as(db, u.client, `select * from public.update_order_status($1, 'accepted')`, [ids.order]),
     'transition_not_allowed');
-  const updated = await as(db, u.client, `update public.orders set total = 1 where id = $1 returning id`, [ids.order]);
-  assert.equal(updated.length, 0, 'no update policy on orders');
+  await rejects(as(db, u.client, `update public.orders set total = 1 where id = $1`, [ids.order]), 'permission denied');
+  await rejects(as(db, u.client, `insert into public.order_items (order_id, name, unit, price, quantity) values ($1, 'x', 'pcs', 1, 1)`, [ids.order]), 'permission denied');
 });
 
 test('courier registration: pending courier cannot go online until admin approves', async () => {

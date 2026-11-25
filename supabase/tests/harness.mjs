@@ -72,9 +72,9 @@ create publication supabase_realtime;
 
 -- ---- Supabase default privileges on public ----
 grant usage on schema public to anon, authenticated, service_role;
-alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
-alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
-alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
+-- like the live project ("secure by default"): no automatic table grants to API roles;
+-- migrations must grant exactly what each role needs.
+-- like the live project: functions are executable via PUBLIC only (no explicit role grants)
 `;
 
 function prepareMigration(sql) {

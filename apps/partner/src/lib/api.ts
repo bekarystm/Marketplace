@@ -162,7 +162,7 @@ export function useUpdateStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ orderId, status, note }: { orderId: string; status: OrderStatus; note?: string }) =>
-      unwrap(await supabase.rpc('update_order_status', { p_order_id: orderId, p_status: status, p_note: note ?? null })),
+      unwrap(await supabase.rpc('update_order_status', { p_order_id: orderId, p_status: status, p_note: note ?? undefined })),
     onSettled: (_d, _e, v) => {
       qc.invalidateQueries({ queryKey: ['partner_order', v.orderId] });
       qc.invalidateQueries({ queryKey: ['store_orders'] });
@@ -217,9 +217,9 @@ export function usePickItem(orderId: string) {
         await supabase.rpc('picker_update_item', {
           p_item_id: a.itemId,
           p_status: a.status,
-          p_picked_quantity: a.pickedQuantity ?? null,
-          p_replacement_product_id: a.replacementProductId ?? null,
-          p_replacement_quantity: a.replacementQuantity ?? null,
+          p_picked_quantity: a.pickedQuantity ?? undefined,
+          p_replacement_product_id: a.replacementProductId ?? undefined,
+          p_replacement_quantity: a.replacementQuantity ?? undefined,
         }),
       ),
     onSettled: () => qc.invalidateQueries({ queryKey: ['partner_order', orderId] }),

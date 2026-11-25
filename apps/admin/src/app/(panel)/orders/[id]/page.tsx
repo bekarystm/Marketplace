@@ -32,7 +32,7 @@ export default function OrderDetail() {
   const setStatus = async (status: typeof order.status, note?: string) => {
     setBusy(true);
     setError(null);
-    const { error: e } = await supabase.rpc('update_order_status', { p_order_id: order.id, p_status: status, p_note: note ?? null });
+    const { error: e } = await supabase.rpc('update_order_status', { p_order_id: order.id, p_status: status, p_note: note ?? undefined });
     setBusy(false);
     if (e) setError(errorMessage(e));
     else reload();

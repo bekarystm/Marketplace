@@ -263,10 +263,10 @@ export function usePlaceOrder() {
           p_address_id: args.addressId,
           p_payment_method: args.paymentMethod,
           p_substitution_policy: args.substitutionPolicy,
-          p_promo_code: args.promoCode || null,
+          p_promo_code: args.promoCode || undefined,
           p_use_bonus: args.useBonus,
-          p_comment: args.comment || null,
-          p_slot_id: args.slotId ?? null,
+          p_comment: args.comment || undefined,
+          p_slot_id: args.slotId ?? undefined,
         }),
       ),
     onSuccess: () => {
@@ -282,7 +282,7 @@ export function useCancelOrder() {
   return useMutation({
     mutationFn: async ({ orderId, reason }: { orderId: string; reason?: string }) =>
       unwrap(
-        await supabase.rpc('update_order_status', { p_order_id: orderId, p_status: 'cancelled', p_note: reason ?? null }),
+        await supabase.rpc('update_order_status', { p_order_id: orderId, p_status: 'cancelled', p_note: reason ?? undefined }),
       ),
     onSuccess: (o) => {
       qc.invalidateQueries({ queryKey: ['order', o.id] });

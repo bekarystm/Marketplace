@@ -1177,105 +1177,479 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      can_access_order: { Args: { p_order_id: string }; Returns: boolean }
-      is_admin: { Args: never; Returns: boolean }
-      is_approved_courier: { Args: never; Returns: boolean }
-      is_store_manager: { Args: { p_store_id: string }; Returns: boolean }
-      is_store_staff: { Args: { p_store_id: string }; Returns: boolean }
-      // ---- order logic (migration 20261125100200) ----
-      check_promo: {
-        Args: { p_code: string; p_store_id: string; p_items_total: number }
+      _notify: {
+        Args: {
+          p_body: string
+          p_data: Json
+          p_title: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      _promo_discount: {
+        Args: {
+          p_items_total: number
+          p_promo: Database["public"]["Tables"]["promo_codes"]["Row"]
+          p_store_id: string
+          p_user_id: string
+        }
         Returns: number
       }
-      place_order: {
+      _recalc_order_totals: { Args: { p_order_id: string }; Returns: undefined }
+      _status_text: {
         Args: {
-          p_store_id: string
-          p_address_id: string
-          p_payment_method: Database["public"]["Enums"]["payment_method"]
-          p_substitution_policy?: Database["public"]["Enums"]["substitution_policy"]
-          p_slot_id?: string | null
-          p_promo_code?: string | null
-          p_use_bonus?: boolean
-          p_comment?: string | null
-        }
-        Returns: Database["public"]["Tables"]["orders"]["Row"]
-      }
-      update_order_status: {
-        Args: {
-          p_order_id: string
+          p_locale: Database["public"]["Enums"]["app_locale"]
           p_status: Database["public"]["Enums"]["order_status"]
-          p_note?: string | null
         }
-        Returns: Database["public"]["Tables"]["orders"]["Row"]
+        Returns: string
       }
-      picker_update_item: {
+      admin_review_courier: {
         Args: {
-          p_item_id: string
-          p_status: Database["public"]["Enums"]["order_item_status"]
-          p_picked_quantity?: number | null
-          p_replacement_product_id?: string | null
-          p_replacement_quantity?: number | null
+          p_reason?: string
+          p_status: Database["public"]["Enums"]["courier_application_status"]
+          p_user_id: string
         }
-        Returns: Database["public"]["Tables"]["order_items"]["Row"]
+        Returns: {
+          created_at: string
+          deliveries_count: number
+          document_photo_url: string | null
+          iin: string | null
+          is_online: boolean
+          rating: number | null
+          rejection_reason: string | null
+          selfie_url: string | null
+          status: Database["public"]["Enums"]["courier_application_status"]
+          updated_at: string
+          user_id: string
+          vehicle: Database["public"]["Enums"]["vehicle_type"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "couriers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_set_user_blocked: {
+        Args: { p_blocked: boolean; p_user_id: string }
+        Returns: {
+          avatar_url: string | null
+          bonus_balance: number
+          created_at: string
+          full_name: string | null
+          id: string
+          is_blocked: boolean
+          locale: Database["public"]["Enums"]["app_locale"]
+          phone: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_set_user_role: {
+        Args: {
+          p_role: Database["public"]["Enums"]["user_role"]
+          p_user_id: string
+        }
+        Returns: {
+          avatar_url: string | null
+          bonus_balance: number
+          created_at: string
+          full_name: string | null
+          id: string
+          is_blocked: boolean
+          locale: Database["public"]["Enums"]["app_locale"]
+          phone: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      can_access_order: { Args: { p_order_id: string }; Returns: boolean }
+      check_promo: {
+        Args: { p_code: string; p_items_total: number; p_store_id: string }
+        Returns: number
       }
       client_respond_replacement: {
-        Args: { p_item_id: string; p_approve: boolean }
-        Returns: Database["public"]["Tables"]["order_items"]["Row"]
+        Args: { p_approve: boolean; p_item_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          image_url: string | null
+          name: string
+          order_id: string
+          picked_quantity: number | null
+          price: number
+          product_id: string | null
+          quantity: number
+          replacement_approved: boolean | null
+          replacement_name: string | null
+          replacement_price: number | null
+          replacement_product_id: string | null
+          replacement_quantity: number | null
+          status: Database["public"]["Enums"]["order_item_status"]
+          unit: Database["public"]["Enums"]["product_unit"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "order_items"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      confirm_card_payment: {
+        Args: {
+          p_amount: number
+          p_order_id: string
+          p_payload?: Json
+          p_provider: string
+          p_provider_payment_id: string
+        }
+        Returns: {
+          accepted_at: string | null
+          address_comment: string | null
+          address_line: string
+          apartment: string | null
+          bonus_earned: number
+          bonus_spent: number
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          client_id: string
+          comment: string | null
+          contact_phone: string
+          courier_assigned_at: string | null
+          courier_id: string | null
+          created_at: string
+          delivered_at: string | null
+          delivery_fee: number
+          discount_amount: number
+          entrance: string | null
+          floor: string | null
+          id: string
+          intercom: string | null
+          items_total: number
+          lat: number
+          lng: number
+          number: number
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          picked_up_at: string | null
+          picker_id: string | null
+          placed_at: string
+          promo_code_id: string | null
+          ready_at: string | null
+          slot_id: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          store_id: string
+          substitution_policy: Database["public"]["Enums"]["substitution_policy"]
+          total: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      courier_accept_order: {
+        Args: { p_order_id: string }
+        Returns: {
+          accepted_at: string | null
+          address_comment: string | null
+          address_line: string
+          apartment: string | null
+          bonus_earned: number
+          bonus_spent: number
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          client_id: string
+          comment: string | null
+          contact_phone: string
+          courier_assigned_at: string | null
+          courier_id: string | null
+          created_at: string
+          delivered_at: string | null
+          delivery_fee: number
+          discount_amount: number
+          entrance: string | null
+          floor: string | null
+          id: string
+          intercom: string | null
+          items_total: number
+          lat: number
+          lng: number
+          number: number
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          picked_up_at: string | null
+          picker_id: string | null
+          placed_at: string
+          promo_code_id: string | null
+          ready_at: string | null
+          slot_id: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          store_id: string
+          substitution_policy: Database["public"]["Enums"]["substitution_policy"]
+          total: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       courier_available_orders: {
         Args: never
         Returns: {
-          order_id: string
-          number: number
-          status: Database["public"]["Enums"]["order_status"]
-          store_id: string
-          store_name: string
-          store_address: string
-          store_lat: number
-          store_lng: number
           delivery_address: string
+          delivery_distance_m: number
+          delivery_fee: number
           delivery_lat: number
           delivery_lng: number
-          distance_to_store_m: number | null
-          delivery_distance_m: number
-          total: number
-          delivery_fee: number
+          distance_to_store_m: number
+          number: number
+          order_id: string
           payment_method: Database["public"]["Enums"]["payment_method"]
           placed_at: string
+          status: Database["public"]["Enums"]["order_status"]
+          store_address: string
+          store_id: string
+          store_lat: number
+          store_lng: number
+          store_name: string
+          total: number
         }[]
       }
-      courier_accept_order: {
-        Args: { p_order_id: string }
-        Returns: Database["public"]["Tables"]["orders"]["Row"]
-      }
       courier_release_order: {
-        Args: { p_order_id: string; p_reason?: string | null }
-        Returns: Database["public"]["Tables"]["orders"]["Row"]
-      }
-      admin_review_courier: {
-        Args: {
-          p_user_id: string
-          p_status: Database["public"]["Enums"]["courier_application_status"]
-          p_reason?: string | null
+        Args: { p_order_id: string; p_reason?: string }
+        Returns: {
+          accepted_at: string | null
+          address_comment: string | null
+          address_line: string
+          apartment: string | null
+          bonus_earned: number
+          bonus_spent: number
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          client_id: string
+          comment: string | null
+          contact_phone: string
+          courier_assigned_at: string | null
+          courier_id: string | null
+          created_at: string
+          delivered_at: string | null
+          delivery_fee: number
+          discount_amount: number
+          entrance: string | null
+          floor: string | null
+          id: string
+          intercom: string | null
+          items_total: number
+          lat: number
+          lng: number
+          number: number
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          picked_up_at: string | null
+          picker_id: string | null
+          placed_at: string
+          promo_code_id: string | null
+          ready_at: string | null
+          slot_id: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          store_id: string
+          substitution_policy: Database["public"]["Enums"]["substitution_policy"]
+          total: number
+          updated_at: string
         }
-        Returns: Database["public"]["Tables"]["couriers"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
-      admin_set_user_role: {
-        Args: { p_user_id: string; p_role: Database["public"]["Enums"]["user_role"] }
-        Returns: Database["public"]["Tables"]["profiles"]["Row"]
-      }
-      // ---- admin helpers (migration 20261125100400) ----
       find_profile_by_phone: {
         Args: { p_phone: string }
-        Returns: { id: string; full_name: string | null; phone: string | null }[]
+        Returns: {
+          full_name: string
+          id: string
+          phone: string
+        }[]
+      }
+      is_admin: { Args: never; Returns: boolean }
+      is_approved_courier: { Args: never; Returns: boolean }
+      is_store_manager: { Args: { p_store_id: string }; Returns: boolean }
+      is_store_staff: { Args: { p_store_id: string }; Returns: boolean }
+      picker_update_item: {
+        Args: {
+          p_item_id: string
+          p_picked_quantity?: number
+          p_replacement_product_id?: string
+          p_replacement_quantity?: number
+          p_status: Database["public"]["Enums"]["order_item_status"]
+        }
+        Returns: {
+          created_at: string
+          id: string
+          image_url: string | null
+          name: string
+          order_id: string
+          picked_quantity: number | null
+          price: number
+          product_id: string | null
+          quantity: number
+          replacement_approved: boolean | null
+          replacement_name: string | null
+          replacement_price: number | null
+          replacement_product_id: string | null
+          replacement_quantity: number | null
+          status: Database["public"]["Enums"]["order_item_status"]
+          unit: Database["public"]["Enums"]["product_unit"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "order_items"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      place_order: {
+        Args: {
+          p_address_id: string
+          p_comment?: string
+          p_payment_method: Database["public"]["Enums"]["payment_method"]
+          p_promo_code?: string
+          p_slot_id?: string
+          p_store_id: string
+          p_substitution_policy?: Database["public"]["Enums"]["substitution_policy"]
+          p_use_bonus?: boolean
+        }
+        Returns: {
+          accepted_at: string | null
+          address_comment: string | null
+          address_line: string
+          apartment: string | null
+          bonus_earned: number
+          bonus_spent: number
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          client_id: string
+          comment: string | null
+          contact_phone: string
+          courier_assigned_at: string | null
+          courier_id: string | null
+          created_at: string
+          delivered_at: string | null
+          delivery_fee: number
+          discount_amount: number
+          entrance: string | null
+          floor: string | null
+          id: string
+          intercom: string | null
+          items_total: number
+          lat: number
+          lng: number
+          number: number
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          picked_up_at: string | null
+          picker_id: string | null
+          placed_at: string
+          promo_code_id: string | null
+          ready_at: string | null
+          slot_id: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          store_id: string
+          substitution_policy: Database["public"]["Enums"]["substitution_policy"]
+          total: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       staff_profiles: {
         Args: { p_store_id: string }
-        Returns: { id: string; full_name: string | null; phone: string | null }[]
+        Returns: {
+          full_name: string
+          id: string
+          phone: string
+        }[]
       }
-      admin_set_user_blocked: {
-        Args: { p_user_id: string; p_blocked: boolean }
-        Returns: Database["public"]["Tables"]["profiles"]["Row"]
+      update_order_status: {
+        Args: {
+          p_note?: string
+          p_order_id: string
+          p_status: Database["public"]["Enums"]["order_status"]
+        }
+        Returns: {
+          accepted_at: string | null
+          address_comment: string | null
+          address_line: string
+          apartment: string | null
+          bonus_earned: number
+          bonus_spent: number
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          client_id: string
+          comment: string | null
+          contact_phone: string
+          courier_assigned_at: string | null
+          courier_id: string | null
+          created_at: string
+          delivered_at: string | null
+          delivery_fee: number
+          discount_amount: number
+          entrance: string | null
+          floor: string | null
+          id: string
+          intercom: string | null
+          items_total: number
+          lat: number
+          lng: number
+          number: number
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          picked_up_at: string | null
+          picker_id: string | null
+          placed_at: string
+          promo_code_id: string | null
+          ready_at: string | null
+          slot_id: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          store_id: string
+          substitution_policy: Database["public"]["Enums"]["substitution_policy"]
+          total: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
