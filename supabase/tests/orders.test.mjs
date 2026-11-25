@@ -358,3 +358,11 @@ test('push webhook: notifications are forwarded to send-push only when the secre
   assert.equal(rows[0].body.type, 'INSERT');
   assert.equal(rows[0].body.record.body, 'Курьер в пути');
 });
+
+test('profile phone is normalized to E.164 even when auth stores it without "+"', async () => {
+  const id = await createUser(db, { phone: '77017778899' });
+  const [p] = (await db.query(`select phone from public.profiles where id = $1`, [id])).rows;
+  assert.equal(p.phone, '+77017778899');
+  const found = await as(db, u.admin, `select id from public.find_profile_by_phone('+77017778899')`);
+  assert.equal(found.length, 1);
+});
