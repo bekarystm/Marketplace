@@ -366,3 +366,22 @@ test('profile phone is normalized to E.164 even when auth stores it without "+"'
   const found = await as(db, u.admin, `select id from public.find_profile_by_phone('+77017778899')`);
   assert.equal(found.length, 1);
 });
+
+test('admin can deliver an order without a courier; store staff cannot', async () => {
+  await as(db, u.client, `delete from public.cart_items where user_id = $1`, [u.client]);
+  await as(db, u.client, `insert into public.cart_items (user_id, product_id, quantity) values ($1, $2, 3)`, [u.client, ids.milk]);
+  const [o] = await as(db, u.client, `select * from public.place_order($1, $2, 'cash')`, [ids.store, ids.address]);
+  await as(db, u.manager, `select public.update_order_status($1, 'accepted')`, [o.id]);
+  await as(db, u.manager, `select public.update_order_status($1, 'picking')`, [o.id]);
+  const items = await as(db, u.manager, `select id from public.order_items where order_id = $1`, [o.id]);
+  for (const i of items) await as(db, u.manager, `select public.picker_update_item($1, 'picked')`, [i.id]);
+  await as(db, u.manager, `select public.update_order_status($1, 'ready')`, [o.id]);
+
+  await rejects(as(db, u.manager, `select public.update_order_status($1, 'delivering')`, [o.id]), 'transition_not_allowed');
+  const [d1] = await as(db, u.admin, `select * from public.update_order_status($1, 'delivering')`, [o.id]);
+  assert.equal(d1.status, 'delivering');
+  const [d2] = await as(db, u.admin, `select * from public.update_order_status($1, 'delivered')`, [o.id]);
+  assert.equal(d2.status, 'delivered');
+  assert.equal(d2.payment_status, 'paid');
+  assert.equal(d2.courier_id, null);
+});
