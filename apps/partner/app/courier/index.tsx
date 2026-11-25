@@ -64,7 +64,7 @@ export default function CourierHome() {
             {t('courier.stats', { count: courier.deliveries_count, rating: courier.rating ?? '—' })}
           </Text>
         </View>
-        <Switch value={online} onValueChange={toggle} disabled={setOnline.isPending} />
+        <Switch value={online} onValueChange={toggle} disabled={setOnline.isPending} trackColor={{ true: colors.primary, false: colors.border }} thumbColor={colors.white} />
       </View>
 
       {active ? (

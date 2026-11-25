@@ -3,9 +3,11 @@ import { useEffect } from 'react';
 import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Pressable } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import {
   AuthProvider,
+  Icon,
   I18nProvider,
   Loading,
   LoginScreen,
@@ -17,6 +19,12 @@ import {
 } from '@marketplace/mobile';
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 15_000 } } });
+
+const settingsButton = () => (
+  <Pressable onPress={() => router.push('/settings')} hitSlop={10} accessibilityLabel="settings">
+    <Icon name="person-circle-outline" size={28} color={colors.text} />
+  </Pressable>
+);
 
 function Gate() {
   const { userId, loading } = useAuth();
@@ -54,10 +62,11 @@ function Gate() {
       }}
     >
       <Stack.Screen name="index" options={{ title: 'TDKFOOD Партнёр' }} />
+      <Stack.Screen name="settings" options={{ title: t('profile.title') }} />
       <Stack.Screen name="courier/apply" options={{ title: t('courier.apply') }} />
-      <Stack.Screen name="courier/index" options={{ title: t('partner.roleCourier') }} />
+      <Stack.Screen name="courier/index" options={{ title: t('partner.roleCourier'), headerRight: settingsButton }} />
       <Stack.Screen name="courier/order/[id]" options={{ title: '' }} />
-      <Stack.Screen name="picker/index" options={{ title: t('picker.orders') }} />
+      <Stack.Screen name="picker/index" options={{ title: t('picker.orders'), headerRight: settingsButton }} />
       <Stack.Screen name="picker/order/[id]" options={{ title: '' }} />
       <Stack.Screen name="chat/[id]" options={{ title: t('orders.chat') }} />
     </Stack>

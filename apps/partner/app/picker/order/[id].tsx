@@ -76,11 +76,11 @@ export default function PickerOrder() {
             {item.status !== 'pending' ? <Text>{statusBadge(item)}</Text> : null}
             {picking ? (
               <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                <Button style={styles.action} title={t('picker.picked')} onPress={() => markPicked(item)} />
-                <Button style={styles.action} variant="secondary" title={t('picker.missing')}
+                <Button style={styles.action} icon="checkmark" title={t('picker.picked')} onPress={() => markPicked(item)} />
+                <Button style={styles.action} variant="secondary" icon="close" title={t('picker.missingShort')}
                   onPress={() => pick.mutate({ itemId: item.id, status: 'missing' }, { onError })} />
                 {order.substitution_policy !== 'remove' ? (
-                  <Button style={styles.action} variant="secondary" title={t('picker.replace')} onPress={() => { setSearch(''); setReplaceFor(item); }} />
+                  <Button style={styles.action} variant="secondary" icon="swap-horizontal" title={t('picker.replace')} onPress={() => { setSearch(''); setReplaceFor(item); }} />
                 ) : null}
               </View>
             ) : null}

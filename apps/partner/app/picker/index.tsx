@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { formatMoney } from '@marketplace/shared';
-import { Chip, EmptyState, Loading, colors, font, radius, spacing, useI18n } from '@marketplace/mobile';
+import { Chip, EmptyState, Loading, colors, font, radius, shadow, spacing, useI18n } from '@marketplace/mobile';
 import { useStaffStores, useStoreOrders } from '../../src/lib/api';
 
 export default function PickerHome() {
@@ -57,7 +57,7 @@ export default function PickerHome() {
 }
 
 const styles = StyleSheet.create({
-  card: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: spacing.lg, gap: spacing.xs },
+  card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.lg, gap: spacing.xs, ...shadow },
   row: { flexDirection: 'row', justifyContent: 'space-between' },
   title: { fontSize: font.lg, fontWeight: '700', color: colors.text },
   status: { fontSize: font.md, color: colors.primary, fontWeight: '600' },

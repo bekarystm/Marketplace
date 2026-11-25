@@ -81,7 +81,7 @@ export default function CourierOrder() {
       </Card>
 
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-        <Button style={{ flex: 1 }} variant="secondary" icon="navigate-outline" title={t('courier.navigate')} onPress={() => openNavigator(target.lat, target.lng)} />
+        <Button style={{ flex: 1 }} variant="secondary" icon="navigate-outline" title={t('courier.navigateShort')} onPress={() => openNavigator(target.lat, target.lng)} />
         <Button style={{ flex: 1 }} variant="secondary" icon="call-outline" title={formatPhone(order.contact_phone)} onPress={() => Linking.openURL(`tel:${order.contact_phone}`)} />
       </View>
       <Button variant="secondary" icon="chatbubbles-outline" title={t('orders.chat')} onPress={() => router.push(`/chat/${order.id}`)} />
