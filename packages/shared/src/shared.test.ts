@@ -67,3 +67,12 @@ test('i18n', () => {
   assert.equal(localized({ name_ru: 'Молоко', name_kk: 'Сүт' }, 'name', 'kk'), 'Сүт');
   assert.equal(localized({ name_ru: 'Молоко', name_kk: null }, 'name', 'kk'), 'Молоко');
 });
+
+test('distanceMeters', async () => {
+  const { distanceMeters } = await import('./geo.ts');
+  const store = { lat: 45.0156, lng: 78.3739 };
+  const near = distanceMeters(store, { lat: 45.0126309, lng: 78.3698848 });
+  assert.ok(near > 400 && near < 700, `expected ~600 m, got ${near}`);
+  const far = distanceMeters(store, { lat: 46.1617456, lng: 80.9414322 });
+  assert.ok(Math.abs(far - 237406) < 500, `expected ~237 km (PostGIS value), got ${far}`);
+});

@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import * as Location from 'expo-location';
-import { CITY, errorMessage } from '@marketplace/shared';
+import { CITY, CITY_RADIUS_M, distanceMeters, errorMessage, formatDistance } from '@marketplace/shared';
 import { useSaveAddress } from '../../src/lib/api';
 import { useSelectedAddress } from '../../src/lib/hooks';
 import { useI18n } from '@marketplace/mobile';
-import { reverseGeocode } from '@marketplace/mobile';
+import { colors, font, reverseGeocode, searchAddress } from '@marketplace/mobile';
 import { OsmMap } from '@marketplace/mobile';
 import { Button, TextField } from '@marketplace/mobile';
 import { spacing } from '@marketplace/mobile';
@@ -23,32 +23,70 @@ export default function NewAddress() {
   const [apartment, setApartment] = useState('');
   const [intercom, setIntercom] = useState('');
   const [comment, setComment] = useState('');
+  const [searching, setSearching] = useState(false);
   const geocodeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // after a text search we keep the user's wording instead of overwriting it by reverse geocoding
+  const skipReverse = useRef(false);
 
   const onCenterChange = (c: { lat: number; lng: number }) => {
     setMapCenter(c);
     if (geocodeTimer.current) clearTimeout(geocodeTimer.current);
+    if (skipReverse.current) {
+      skipReverse.current = false;
+      return;
+    }
     geocodeTimer.current = setTimeout(async () => {
       const label = await reverseGeocode(c.lat, c.lng);
       if (label) setLine(label);
     }, 800);
   };
 
-  const useMyLocation = async () => {
+  const useMyLocation = async (silent = false) => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') return;
     const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
     const c = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    if (distanceMeters(c, CITY.center) > CITY_RADIUS_M) {
+      // the phone is outside the delivery city: don't jump there
+      if (!silent) Alert.alert(t('address.title'), t('address.locationOutsideCity'));
+      return;
+    }
     setCenter(c);
     onCenterChange(c);
   };
 
+  const findOnMap = async () => {
+    const query = line.trim();
+    if (!query) return;
+    setSearching(true);
+    try {
+      const results = await searchAddress(`${query}, ${CITY.name.ru}`, CITY.center);
+      const hit = results[0];
+      if (!hit) {
+        Alert.alert(t('address.title'), t('address.notFound'));
+        return;
+      }
+      skipReverse.current = true;
+      setCenter({ lat: hit.lat, lng: hit.lng });
+      setMapCenter({ lat: hit.lat, lng: hit.lng });
+    } catch {
+      Alert.alert(t('address.title'), t('address.notFound'));
+    } finally {
+      setSearching(false);
+    }
+  };
+
   useEffect(() => {
-    useMyLocation().catch(() => {});
+    useMyLocation(true).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const submit = async () => {
+    const away = distanceMeters(mapCenter, CITY.center);
+    if (away > CITY_RADIUS_M) {
+      Alert.alert(t('address.title'), t('address.outsideCity', { distance: formatDistance(away, locale) }));
+      return;
+    }
     try {
       const a = await save.mutateAsync({
         label: null,
@@ -73,8 +111,18 @@ export default function NewAddress() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <OsmMap center={center} zoom={16} picker onCenterChange={onCenterChange} style={{ height: 300 }} />
       <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}>
-        <Button variant="secondary" title={`📍 ${t('address.useMyLocation')}`} onPress={useMyLocation} />
-        <TextField label={t('address.line')} value={line} onChangeText={setLine} />
+        <Text style={styles.hint}>{t('address.hint')}</Text>
+        <TextField
+          label={t('address.line')}
+          value={line}
+          onChangeText={setLine}
+          returnKeyType="search"
+          onSubmitEditing={findOnMap}
+        />
+        <View style={styles.grid}>
+          <Button style={styles.cell} variant="secondary" title={`🔍 ${t('address.findOnMap')}`} onPress={findOnMap} loading={searching} disabled={!line.trim()} />
+          <Button style={styles.cell} variant="secondary" title={`📍 ${t('address.useMyLocation')}`} onPress={() => useMyLocation()} />
+        </View>
         <View style={styles.grid}>
           <View style={styles.cell}><TextField label={t('address.apartment')} value={apartment} onChangeText={setApartment} /></View>
           <View style={styles.cell}><TextField label={t('address.entrance')} value={entrance} onChangeText={setEntrance} /></View>
@@ -93,4 +141,5 @@ export default function NewAddress() {
 const styles = StyleSheet.create({
   grid: { flexDirection: 'row', gap: spacing.md },
   cell: { flex: 1 },
+  hint: { fontSize: font.sm, color: colors.textMuted },
 });
