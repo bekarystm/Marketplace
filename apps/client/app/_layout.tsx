@@ -1,12 +1,17 @@
 import { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { AuthProvider, useAuth } from '@marketplace/mobile';
-import { I18nProvider, useI18n } from '@marketplace/mobile';
-import { registerPushToken } from '@marketplace/mobile';
-import { colors } from '@marketplace/mobile';
+import {
+  AuthProvider,
+  I18nProvider,
+  colors,
+  onNotificationOpened,
+  registerPushToken,
+  useAuth,
+  useI18n,
+} from '@marketplace/mobile';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -18,6 +23,13 @@ function AppStack() {
   useEffect(() => {
     if (userId) registerPushToken(userId, 'client');
   }, [userId]);
+  useEffect(
+    () =>
+      onNotificationOpened((data) => {
+        if (typeof data.order_id === 'string') router.push(`/order/${data.order_id}`);
+      }),
+    [],
+  );
 
   return (
     <Stack

@@ -1,6 +1,6 @@
 import '../src/lib/location'; // registers the background location task
 import { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -10,6 +10,7 @@ import {
   Loading,
   LoginScreen,
   colors,
+  onNotificationOpened,
   registerPushToken,
   useAuth,
   useI18n,
@@ -23,6 +24,15 @@ function Gate() {
   useEffect(() => {
     if (userId) registerPushToken(userId, 'partner');
   }, [userId]);
+  useEffect(
+    () =>
+      onNotificationOpened((data) => {
+        if (typeof data.order_id !== 'string') return;
+        // couriers get "ready"/"cancelled" pushes, staff get "new order"
+        router.push(data.status === 'placed' ? `/picker/order/${data.order_id}` : `/courier/order/${data.order_id}`);
+      }),
+    [],
+  );
 
   if (loading) return <Loading />;
   if (!userId) {

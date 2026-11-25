@@ -41,8 +41,7 @@ before(async () => {
   await as(db, u.manager, `insert into public.store_staff (store_id, user_id, role) values ($1, $2, 'picker')`,
     [ids.store, u.picker]);
 
-  const [cat] = await as(db, u.admin, `
-    insert into public.categories (slug, name_ru, name_kk) values ('dairy', 'Молочные продукты', 'Сүт өнімдері') returning id`);
+  const [cat] = await as(db, null, `select id from public.categories where slug = 'dairy'`);
   ids.category = cat.id;
 
   // manager creates products
@@ -305,4 +304,42 @@ test('stock check: cannot order more than available', async () => {
     [u.client, ids.kefir]);
   await rejects(as(db, u.client, `select * from public.place_order($1, $2, 'cash')`, [ids.store, ids.address]),
     'items_unavailable');
+});
+
+test('admin helpers: find user by phone and staff profiles are restricted', async () => {
+  const [clientProfile] = await db.query(`select phone from public.profiles where id = $1`, [u.client]).then((r) => r.rows);
+  const asAdmin = await as(db, u.admin, `select * from public.find_profile_by_phone($1)`, [clientProfile.phone]);
+  assert.equal(asAdmin.length, 1);
+  const asManager = await as(db, u.manager, `select * from public.find_profile_by_phone($1)`, [clientProfile.phone]);
+  assert.equal(asManager.length, 1);
+  const asClient = await as(db, u.client2, `select * from public.find_profile_by_phone($1)`, [clientProfile.phone]);
+  assert.equal(asClient.length, 0, 'regular users cannot look up phones');
+  await rejects(as(db, null, `select * from public.find_profile_by_phone($1)`, [clientProfile.phone]), 'permission denied');
+
+  const staff = await as(db, u.manager, `select * from public.staff_profiles($1)`, [ids.store]);
+  assert.equal(staff.length, 2);
+  assert.equal((await as(db, u.picker, `select * from public.staff_profiles($1)`, [ids.store])).length, 0);
+});
+
+test('starter categories are seeded', async () => {
+  const rows = await as(db, null, `select slug from public.categories where slug in ('dairy', 'fruits-vegetables', 'pets')`);
+  assert.ok(rows.length >= 2);
+});
+
+test('notifications are generated for order events', async () => {
+  const clientNotes = await as(db, u.client, `select title, body, data from public.notifications order by created_at`);
+  const bodies = clientNotes.map((n) => n.body);
+  assert.ok(bodies.includes('Магазин принял заказ'), 'client notified on accept');
+  assert.ok(bodies.includes('Заказ доставлен. Приятного аппетита!'), 'client notified on delivery');
+  assert.ok(bodies.some((b) => b.includes('→ Кефир 3.2% 1л')), 'client notified about replacement');
+
+  const staffNotes = await as(db, u.picker, `select title from public.notifications`);
+  assert.ok(staffNotes.some((n) => n.title.startsWith('Новый заказ')), 'staff notified about new order');
+  const courierNotes = await as(db, u.courier, `select title from public.notifications`);
+  assert.ok(courierNotes.some((n) => n.title.endsWith('собран')), 'courier notified when ready');
+
+  // users only see their own notifications and can only mark them read
+  assert.equal((await as(db, u.client2, `select * from public.notifications where user_id = $1`, [u.client])).length, 0);
+  await rejects(as(db, u.client, `update public.notifications set title = 'x'`), 'permission denied');
+  await as(db, u.client, `update public.notifications set read_at = now()`);
 });

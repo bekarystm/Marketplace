@@ -1,0 +1,14 @@
+# Supabase project config (used by the Supabase CLI for local dev / deploys)
+project_id = "dnedbkhkobyribjouxgz"
+
+[functions.send-push]
+verify_jwt = false   # called by a Database Webhook, authenticated with x-webhook-secret
+
+[functions.whatsapp-otp]
+verify_jwt = false   # Auth hook, authenticated with Standard Webhooks signature
+
+[functions.create-payment]
+verify_jwt = true
+
+[functions.payment-webhook]
+verify_jwt = false   # payment provider callbacks / sandbox page, verified by signature

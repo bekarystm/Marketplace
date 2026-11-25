@@ -1264,6 +1264,15 @@ export type Database = {
         Args: { p_user_id: string; p_role: Database["public"]["Enums"]["user_role"] }
         Returns: Database["public"]["Tables"]["profiles"]["Row"]
       }
+      // ---- admin helpers (migration 20261125100400) ----
+      find_profile_by_phone: {
+        Args: { p_phone: string }
+        Returns: { id: string; full_name: string | null; phone: string | null }[]
+      }
+      staff_profiles: {
+        Args: { p_store_id: string }
+        Returns: { id: string; full_name: string | null; phone: string | null }[]
+      }
       admin_set_user_blocked: {
         Args: { p_user_id: string; p_blocked: boolean }
         Returns: Database["public"]["Tables"]["profiles"]["Row"]

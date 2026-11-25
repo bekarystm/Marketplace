@@ -2,7 +2,7 @@ export * from './theme';
 export { supabase } from './supabase';
 export { AuthProvider, useAuth } from './auth';
 export { I18nProvider, useI18n } from './i18n';
-export { registerPushToken } from './push';
+export { registerPushToken, onNotificationOpened } from './push';
 export { reverseGeocode, searchAddress } from './geocode';
 export { isStoreOpen } from './hours';
 export * from './ui';

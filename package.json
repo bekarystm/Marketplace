@@ -7,7 +7,10 @@
     "typecheck": "pnpm -r --parallel typecheck",
     "client": "pnpm --filter @marketplace/client start",
     "partner": "pnpm --filter @marketplace/partner start",
-    "admin": "pnpm --filter @marketplace/admin dev"
+    "admin": "pnpm --filter @marketplace/admin dev",
+    "test": "pnpm --filter @marketplace/shared test && pnpm test:db"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }

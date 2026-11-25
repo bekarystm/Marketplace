@@ -36,3 +36,11 @@ export async function registerPushToken(userId: string, app: 'client' | 'partner
     console.warn('push registration failed', e);
   }
 }
+
+/** Call `onOpen` with the notification's data when the user taps a push. */
+export function onNotificationOpened(onOpen: (data: Record<string, unknown>) => void) {
+  const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+    onOpen((response.notification.request.content.data ?? {}) as Record<string, unknown>);
+  });
+  return () => sub.remove();
+}
