@@ -49,8 +49,14 @@ export async function startLocationSharing(): Promise<boolean> {
     },
   };
   if (bg.status === 'granted') {
-    const running = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK).catch(() => false);
-    if (!running) await Location.startLocationUpdatesAsync(LOCATION_TASK, options);
+    try {
+      const running = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK).catch(() => false);
+      if (!running) await Location.startLocationUpdatesAsync(LOCATION_TASK, options);
+    } catch (e) {
+      // Background location is unavailable in Expo Go (needs a development/production build);
+      // the foreground watcher below still keeps the courier visible while the app is open.
+      console.warn('background location unavailable', e);
+    }
   }
   return true;
 }
