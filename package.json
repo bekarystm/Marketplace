@@ -1,0 +1,13 @@
+{
+  "name": "marketplace",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "test:db": "pnpm --filter @marketplace/db-tests test",
+    "typecheck": "pnpm -r --parallel typecheck",
+    "client": "pnpm --filter @marketplace/client start",
+    "partner": "pnpm --filter @marketplace/partner start",
+    "admin": "pnpm --filter @marketplace/admin dev"
+  },
+  "engines": { "node": ">=20" }
+}
