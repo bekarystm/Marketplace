@@ -385,3 +385,9 @@ test('admin can deliver an order without a courier; store staff cannot', async (
   assert.equal(d2.payment_status, 'paid');
   assert.equal(d2.courier_id, null);
 });
+
+test('staff notification shows a formatted total', async () => {
+  const rows = (await db.query(`select body from public.notifications where title like 'Новый заказ%' order by created_at desc limit 1`)).rows;
+  assert.match(rows[0].body, /^Сумма [\d ]+ ₸$/);
+  assert.equal((await db.query(`select public._fmt_tenge(12500.5) as v`)).rows[0].v, '12 501 ₸');
+});

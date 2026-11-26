@@ -76,3 +76,12 @@ test('distanceMeters', async () => {
   const far = distanceMeters(store, { lat: 46.1617456, lng: 80.9414322 });
   assert.ok(Math.abs(far - 237406) < 500, `expected ~237 km (PostGIS value), got ${far}`);
 });
+
+test('delivery slots are shown in Kazakhstan time (UTC+5)', async () => {
+  const { slotRange, groupSlotsByDay } = await import('./slots.ts');
+  // 07:00–09:00 UTC = 12:00–14:00 in Kazakhstan
+  assert.equal(slotRange({ starts_at: '2026-11-27T07:00:00Z', ends_at: '2026-11-27T09:00:00Z' }), '12:00–14:00');
+  const far = new Date(Date.now() + 5 * 86400000).toISOString();
+  const groups = groupSlotsByDay([{ id: '1', starts_at: far, ends_at: far, capacity: 1, booked: 0 }], { today: 'T', tomorrow: 'M' });
+  assert.match(groups[0].label, /^\d{2}\.\d{2}$/);
+});

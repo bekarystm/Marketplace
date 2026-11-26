@@ -6,6 +6,7 @@ import {
   formatMoney,
   formatPhone,
   formatQuantity,
+  slotLabel,
   staffNextStatus,
   type OrderItem,
 } from '@marketplace/shared';
@@ -70,6 +71,9 @@ export default function PickerOrder() {
       <Stack.Screen options={{ title: t('orders.number', { number: order.number }) }} />
       <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 120, gap: spacing.md }}>
         <Text style={styles.status}>{t(`status.${order.status}` as const)}</Text>
+        {order.slot ? (
+          <Text style={styles.slotText}>⏰ {t('orders.deliveryTime', { time: slotLabel(order.slot, { today: t('checkout.today'), tomorrow: t('checkout.tomorrow') }) })}</Text>
+        ) : null}
         <Card style={{ gap: spacing.xs }}>
           <Text style={styles.bold}>{client?.full_name ?? ''}</Text>
           <Text style={styles.link} onPress={() => Linking.openURL(`tel:${order.contact_phone}`)}>{formatPhone(order.contact_phone)}</Text>
@@ -170,6 +174,7 @@ export default function PickerOrder() {
 
 const styles = StyleSheet.create({
   status: { fontSize: font.xl, fontWeight: '800', color: colors.primary },
+  slotText: { fontSize: font.md, fontWeight: '700', color: colors.accentDark },
   row: { flexDirection: 'row', gap: spacing.md },
   bold: { fontSize: font.md, fontWeight: '700', color: colors.text },
   muted: { fontSize: font.sm, color: colors.textMuted },

@@ -14,9 +14,11 @@ import {
   useCourierLocation,
   useOrder,
   useRespondReplacement,
+  useRepeatOrder,
   useReview,
   useSubmitReview,
 } from '../../src/lib/api';
+import { slotLabel } from '@marketplace/shared';
 import { supabase } from '@marketplace/mobile';
 import { useI18n } from '@marketplace/mobile';
 import { OsmMap, type MapMarker } from '@marketplace/mobile';
@@ -44,6 +46,7 @@ export default function OrderScreen() {
   const respond = useRespondReplacement(id!);
   const { data: review } = useReview(data?.order.status === 'delivered' ? id : undefined);
   const submitReview = useSubmitReview();
+  const repeat = useRepeatOrder();
   const [storeRating, setStoreRating] = useState(0);
   const [courierRating, setCourierRating] = useState(0);
   const order = data?.order;
@@ -131,6 +134,11 @@ export default function OrderScreen() {
     <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 48 }}>
       <Stack.Screen options={{ title: t('orders.number', { number: order.number }) }} />
       <Text style={styles.store}>{order.store?.name}</Text>
+      {order.slot ? (
+        <Text style={styles.slot}>
+          {t('orders.deliveryTime', { time: slotLabel(order.slot, { today: t('checkout.today'), tomorrow: t('checkout.tomorrow') }) })}
+        </Text>
+      ) : null}
 
       {order.status === 'awaiting_payment' ? (
         <Button variant="accent" icon="card" style={{ marginTop: spacing.md }} title={`${t('orders.payNow')} ${formatMoney(order.total)}`} onPress={pay} />
@@ -201,6 +209,22 @@ export default function OrderScreen() {
         </Card>
       ) : null}
 
+      {order.status === 'delivered' || order.status === 'cancelled' ? (
+        <Button
+          style={{ marginTop: spacing.lg }}
+          variant="accent"
+          icon="refresh"
+          title={t('orders.repeat')}
+          loading={repeat.isPending}
+          onPress={() =>
+            repeat.mutate(data.items.map((i) => ({ product_id: i.product_id, quantity: Number(i.quantity) })), {
+              onSuccess: () => router.navigate('/cart'),
+              onError: (e) => Alert.alert(t('common.error'), errorMessage(e, locale)),
+            })
+          }
+        />
+      ) : null}
+
       {clientCanCancel(order.status) ? (
         <Button style={{ marginTop: spacing.xl }} variant="ghost" title={t('orders.cancel')} onPress={onCancel} loading={cancel.isPending} />
       ) : null}
@@ -215,6 +239,7 @@ const styles = StyleSheet.create({
   },
   etaText: { fontSize: font.md, fontWeight: '700', color: colors.text, flex: 1 },
   store: { fontSize: font.lg, color: colors.textMuted },
+  slot: { fontSize: font.md, color: colors.primary, fontWeight: '700', marginTop: 4 },
   item: { flexDirection: 'row', gap: spacing.md },
   itemName: { fontSize: font.md, color: colors.text },
   strike: { textDecorationLine: 'line-through', color: colors.textMuted },

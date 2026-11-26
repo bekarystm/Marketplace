@@ -8,11 +8,12 @@ import {
   type PaymentMethod,
   type SubstitutionPolicy,
 } from '@marketplace/shared';
-import { checkPromo, useAppSettings, usePlaceOrder, useStore } from '../src/lib/api';
+import { checkPromo, useAppSettings, useDeliverySlots, usePlaceOrder, useStore } from '../src/lib/api';
+import { groupSlotsByDay, slotRange } from '@marketplace/shared';
 import { useI18n } from '@marketplace/mobile';
 import { useAuth } from '@marketplace/mobile';
 import { useCartControls, useSelectedAddress } from '../src/lib/hooks';
-import { Button, Card, RadioRow, Row, SectionTitle, TextField } from '@marketplace/mobile';
+import { Button, Card, Chip, RadioRow, Row, SectionTitle, TextField } from '@marketplace/mobile';
 import { colors, font, spacing } from '@marketplace/mobile';
 
 const POLICIES: SubstitutionPolicy[] = ['contact_me', 'replace_similar', 'remove'];
@@ -34,6 +35,10 @@ export default function Checkout() {
   const [promoError, setPromoError] = useState<string | null>(null);
   const [useBonus, setUseBonus] = useState(false);
   const [comment, setComment] = useState('');
+  const { data: slots } = useDeliverySlots(storeId);
+  const [when, setWhen] = useState<'asap' | 'slot'>('asap');
+  const [slotId, setSlotId] = useState<string | null>(null);
+  const slotGroups = groupSlotsByDay(slots ?? [], { today: t('checkout.today'), tomorrow: t('checkout.tomorrow') });
 
   const lines = cart
     .filter((c) => c.product.store_id === storeId)
@@ -72,6 +77,7 @@ export default function Checkout() {
         promoCode: promo?.code,
         useBonus,
         comment,
+        slotId: when === 'slot' ? slotId : null,
       });
       router.dismissAll();
       router.push(`/order/${order.id}`);
@@ -90,6 +96,30 @@ export default function Checkout() {
         <Pressable onPress={() => router.push('/address/new')}>
           <Text style={styles.link}>+ {t('checkout.addAddress')}</Text>
         </Pressable>
+      </Card>
+
+      <SectionTitle>{t('checkout.when')}</SectionTitle>
+      <Card>
+        <RadioRow icon="flash-outline" label={t('checkout.asap')} selected={when === 'asap'} onPress={() => setWhen('asap')} />
+        <RadioRow icon="time-outline" label={t('checkout.slot')} selected={when === 'slot'} onPress={() => setWhen('slot')} />
+        {when === 'slot' ? (
+          slotGroups.length === 0 ? (
+            <Text style={styles.muted}>{t('checkout.noSlots')}</Text>
+          ) : (
+            <View style={{ gap: spacing.md, marginTop: spacing.sm }}>
+              {slotGroups.map((g) => (
+                <View key={g.label} style={{ gap: spacing.sm }}>
+                  <Text style={styles.dayLabel}>{g.label}</Text>
+                  <View style={styles.slotWrap}>
+                    {g.slots.map((sl) => (
+                      <Chip key={sl.id} label={slotRange(sl)} active={slotId === sl.id} onPress={() => setSlotId(sl.id)} />
+                    ))}
+                  </View>
+                </View>
+              ))}
+            </View>
+          )
+        ) : null}
       </Card>
 
       <SectionTitle>{t('checkout.payment')}</SectionTitle>
@@ -139,7 +169,7 @@ export default function Checkout() {
         variant="accent"
         style={{ marginTop: spacing.lg }}
         title={t('checkout.place', { amount: formatMoney(totals?.total ?? 0) })}
-        disabled={!address || !totals?.canCheckout}
+        disabled={!address || !totals?.canCheckout || (when === 'slot' && !slotId)}
         loading={placeOrder.isPending}
         onPress={submit}
       />
@@ -148,6 +178,9 @@ export default function Checkout() {
 }
 
 const styles = StyleSheet.create({
+  muted: { fontSize: font.sm, color: colors.textMuted, marginTop: spacing.sm },
+  dayLabel: { fontSize: font.sm, fontWeight: '700', color: colors.text },
+  slotWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   link: { color: colors.primary, fontSize: font.md, fontWeight: '600', paddingVertical: spacing.sm },
   bonusRow: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.lg, gap: spacing.md },
 });

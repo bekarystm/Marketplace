@@ -1,7 +1,7 @@
 'use client';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { errorMessage, formatMoney, formatPhone, formatQuantity, staffNextStatus } from '@marketplace/shared';
+import { errorMessage, formatMoney, formatPhone, formatQuantity, slotLabel, staffNextStatus, channelName } from '@marketplace/shared';
 import { supabase } from '@/lib/supabase';
 import { useData, unwrap } from '@/lib/useData';
 import { useSession } from '@/lib/session';
@@ -15,7 +15,7 @@ export default function OrderDetail() {
   const [busy, setBusy] = useState(false);
   const [reason, setReason] = useState('');
   const { data, reload } = useData(async () => {
-    const order = unwrap(await supabase.from('orders').select('*, store:stores(name, phone)').eq('id', id).single());
+    const order = unwrap(await supabase.from('orders').select('*, store:stores(name, phone), slot:delivery_slots(starts_at, ends_at)').eq('id', id).single());
     const [items, history, client, courier] = await Promise.all([
       supabase.from('order_items').select('*').eq('order_id', id).order('created_at'),
       supabase.from('order_status_history').select('*').eq('order_id', id).order('created_at'),
@@ -28,7 +28,7 @@ export default function OrderDetail() {
   // live updates: client approvals of substitutions, courier progress, etc.
   useEffect(() => {
     const ch = supabase
-      .channel(`admin-order-${id}`)
+      .channel(channelName(`admin-order-${id}`))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `id=eq.${id}` }, () => reload())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items', filter: `order_id=eq.${id}` }, () => reload())
       .subscribe();
@@ -171,6 +171,7 @@ export default function OrderDetail() {
             <h2 className="mb-2 font-bold">Оплата и доставка</h2>
             <div>{PAYMENT_RU[order.payment_method]} · {PAYMENT_STATUS_RU[order.payment_status]}</div>
             <div>Магазин: {order.store?.name}</div>
+            <div>Время: {order.slot ? slotLabel(order.slot, { today: 'Сегодня', tomorrow: 'Завтра' }) : 'как можно скорее'}</div>
             <div>Курьер: {courier ? `${courier.full_name ?? ''} ${formatPhone(courier.phone)}` : 'не назначен'}</div>
           </Card>
           <Card className="space-y-2">

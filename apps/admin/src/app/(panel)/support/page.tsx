@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { formatPhone, type ChatMessage } from '@marketplace/shared';
+import { formatPhone, type ChatMessage, channelName } from '@marketplace/shared';
 import { supabase } from '@/lib/supabase';
 import { useData, unwrap } from '@/lib/useData';
 import { useSession } from '@/lib/session';
@@ -19,7 +19,7 @@ export default function SupportPage() {
   useEffect(() => {
     if (!active) return;
     supabase.from('chat_messages').select('*').eq('chat_id', active).order('created_at').then(({ data }) => setMessages(data ?? []));
-    const ch = supabase.channel(`support-${active}`)
+    const ch = supabase.channel(channelName(`support-${active}`))
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `chat_id=eq.${active}` },
         (p) => setMessages((m) => (m.some((x) => x.id === (p.new as ChatMessage).id) ? m : [...m, p.new as ChatMessage])))
       .subscribe();

@@ -43,3 +43,11 @@ export function roundToStep(qty: number, step: number): number {
   const steps = Math.round(qty / step);
   return Number((steps * step).toFixed(3));
 }
+
+/**
+ * Unique realtime channel name. Supabase reuses a channel with the same name, so two
+ * screens subscribing to "order-123" at once would collide; a random suffix avoids it.
+ */
+export function channelName(base: string): string {
+  return `${base}:${Math.random().toString(36).slice(2, 10)}`;
+}

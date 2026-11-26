@@ -1,3 +1,4 @@
+import { channelName } from '@marketplace/shared';
 import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
@@ -201,7 +202,10 @@ export function useAppSettings() {
 }
 
 // ---------- Orders ----------
-export type OrderWithStore = Order & { store: Pick<Store, 'id' | 'name' | 'logo_url' | 'phone'> | null };
+export type OrderWithStore = Order & {
+  store: Pick<Store, 'id' | 'name' | 'logo_url' | 'phone'> | null;
+  slot?: { starts_at: string; ends_at: string } | null;
+};
 
 export function useOrders() {
   const { userId } = useAuth();
@@ -227,7 +231,11 @@ export function useOrder(id: string | undefined) {
     enabled: !!id,
     queryFn: async () => {
       const order = unwrap(
-        await supabase.from('orders').select('*, store:stores(id, name, logo_url, phone)').eq('id', id!).single(),
+        await supabase
+          .from('orders')
+          .select('*, store:stores(id, name, logo_url, phone), slot:delivery_slots(starts_at, ends_at)')
+          .eq('id', id!)
+          .single(),
       );
       const items = unwrap(
         await supabase.from('order_items').select('*').eq('order_id', id!).order('created_at'),
@@ -240,7 +248,7 @@ export function useOrder(id: string | undefined) {
   useEffect(() => {
     if (!id) return;
     const channel = supabase
-      .channel(`order-${id}`)
+      .channel(channelName(`order-${id}`))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `id=eq.${id}` }, () =>
         qc.invalidateQueries({ queryKey: ['order', id] }),
       )
@@ -355,7 +363,7 @@ export function useCourierLocation(courierId: string | null | undefined, active:
   useEffect(() => {
     if (!courierId || !active) return;
     const channel = supabase
-      .channel(`courier-${courierId}`)
+      .channel(channelName(`courier-${courierId}`))
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'courier_locations', filter: `courier_id=eq.${courierId}` },
@@ -369,3 +377,77 @@ export function useCourierLocation(courierId: string | null | undefined, active:
   return query;
 }
 
+
+// ---------- Delivery slots ----------
+import type { Slot } from '@marketplace/shared';
+export type { Slot };
+
+export function useDeliverySlots(storeId: string | undefined) {
+  return useQuery({
+    queryKey: ['slots', storeId],
+    enabled: !!storeId,
+    queryFn: async () =>
+      unwrap(
+        await supabase
+          .from('delivery_slots')
+          .select('id, starts_at, ends_at, capacity, booked')
+          .eq('store_id', storeId!)
+          .gt('starts_at', new Date().toISOString())
+          .order('starts_at')
+          .limit(40),
+      ).filter((s) => s.booked < s.capacity) as Slot[],
+  });
+}
+
+// ---------- Notifications ----------
+export function useNotifications() {
+  const { userId } = useAuth();
+  const qc = useQueryClient();
+  const query = useQuery({
+    queryKey: ['notifications', userId],
+    enabled: !!userId,
+    queryFn: async () =>
+      unwrap(
+        await supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(50),
+      ),
+  });
+  useEffect(() => {
+    if (!userId) return;
+    const ch = supabase
+      .channel(channelName(`notifications-${userId}`))
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` }, () =>
+        qc.invalidateQueries({ queryKey: ['notifications', userId] }),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [userId, qc]);
+  return query;
+}
+
+export function useMarkNotificationsRead() {
+  const qc = useQueryClient();
+  const { userId } = useAuth();
+  return useMutation({
+    mutationFn: async () =>
+      unwrap(await supabase.from('notifications').update({ read_at: new Date().toISOString() }).is('read_at', null).eq('user_id', userId!)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['notifications', userId] }),
+  });
+}
+
+// ---------- Repeat order ----------
+export function useRepeatOrder() {
+  const qc = useQueryClient();
+  const { userId } = useAuth();
+  return useMutation({
+    mutationFn: async (items: { product_id: string | null; quantity: number }[]) => {
+      const rows = items
+        .filter((i) => i.product_id)
+        .map((i) => ({ user_id: userId!, product_id: i.product_id!, quantity: Number(i.quantity), updated_at: new Date().toISOString() }));
+      if (rows.length) unwrap(await supabase.from('cart_items').upsert(rows));
+      return rows.length;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['cart', userId] }),
+  });
+}

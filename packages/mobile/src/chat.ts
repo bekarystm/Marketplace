@@ -1,3 +1,4 @@
+import { channelName } from '@marketplace/shared';
 import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ChatMessage } from '@marketplace/shared';
@@ -46,7 +47,7 @@ export function useChat(params: { orderId?: string; support?: boolean }) {
   useEffect(() => {
     if (!chatId) return;
     const channel = supabase
-      .channel(`chat-${chatId}`)
+      .channel(channelName(`chat-${chatId}`))
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `chat_id=eq.${chatId}` },

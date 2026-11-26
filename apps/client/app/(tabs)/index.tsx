@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { localized } from '@marketplace/shared';
 import { EmptyState, FadeIn, Icon, Logo, PressableScale, Skeleton, colors, font, radius, shadow, spacing, useAuth, useI18n, type IconName } from '@marketplace/mobile';
-import { useCategories, useStores, useUsedCategoryIds } from '../../src/lib/api';
+import { useCategories, useNotifications, useStores, useUsedCategoryIds } from '../../src/lib/api';
 import { categoryStyle } from '../../src/lib/categoryStyle';
 import { useSelectedAddress } from '../../src/lib/hooks';
 import { StoreCard } from '../../src/components/StoreCard';
@@ -27,6 +27,8 @@ export default function Home() {
   const { data: usedIds } = useUsedCategoryIds();
   const shownCategories = (categories ?? []).filter((c) => !c.parent_id && usedIds?.has(c.id)).slice(0, 8);
   const { locale } = useI18n();
+  const { data: notes } = useNotifications();
+  const unread = (notes ?? []).filter((n) => !n.read_at).length;
 
   const openCategory = (categoryId: string) => {
     // with a single store go straight into its catalog, otherwise show the category across stores
@@ -45,9 +47,12 @@ export default function Home() {
         <View style={{ gap: spacing.lg }}>
           <View style={styles.topBar}>
             <Logo size={24} />
-            <Pressable style={styles.iconBtn} onPress={() => router.navigate('/cart')}>
-              <Icon name="bag-handle-outline" size={22} color={colors.text} />
-            </Pressable>
+            <PressableScale style={styles.iconBtn} scaleTo={0.9} onPress={() => router.push(userId ? '/notifications' : '/login')}>
+              <Icon name="notifications-outline" size={22} color={colors.text} />
+              {unread > 0 ? (
+                <View style={styles.badge}><Text style={styles.badgeText}>{unread > 9 ? '9+' : unread}</Text></View>
+              ) : null}
+            </PressableScale>
           </View>
 
           <Pressable style={styles.address} onPress={() => router.push(userId ? '/addresses' : '/login')}>
@@ -144,6 +149,11 @@ const styles = StyleSheet.create({
   },
   featureText: { fontSize: font.xs, fontWeight: '600', color: colors.text, textAlign: 'center' },
   title: { fontSize: font.xl, fontWeight: '800', color: colors.text },
+  badge: {
+    position: 'absolute', top: -2, right: -2, minWidth: 18, height: 18, borderRadius: 9, paddingHorizontal: 4,
+    backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center',
+  },
+  badgeText: { color: colors.white, fontSize: 10, fontWeight: '800' },
   catGrid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -spacing.xs },
   catCell: { width: '25%', paddingHorizontal: spacing.xs, marginBottom: spacing.md },
   catInner: { width: '100%', alignItems: 'center', gap: spacing.xs },

@@ -56,6 +56,7 @@ function AppStack() {
       <Stack.Screen name="order/[id]" options={{ title: '' }} />
       <Stack.Screen name="chat/[id]" options={{ title: t('orders.chat') }} />
       <Stack.Screen name="bonuses" options={{ title: t('profile.bonuses') }} />
+      <Stack.Screen name="notifications" options={{ title: t('notifications.title') }} />
     </Stack>
   );
 }

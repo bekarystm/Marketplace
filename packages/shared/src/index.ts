@@ -7,3 +7,4 @@ export * from './orders.ts';
 export * from './errors.ts';
 export type { Database, Json, Tables, TablesInsert, TablesUpdate, Enums } from './database.types.ts';
 export * from './geo.ts';
+export * from './slots.ts';

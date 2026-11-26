@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { formatMoney } from '@marketplace/shared';
+import { formatMoney, slotLabel } from '@marketplace/shared';
 import { Chip, EmptyState, Loading, colors, font, radius, shadow, spacing, useI18n } from '@marketplace/mobile';
 import { useStaffStores, useStoreOrders } from '../../src/lib/api';
 
@@ -42,6 +42,9 @@ export default function PickerHome() {
               <Text style={styles.title}>{t('orders.number', { number: item.number })}</Text>
               <Text style={styles.title}>{formatMoney(item.total)}</Text>
             </View>
+            {item.slot ? (
+              <Text style={styles.slot}>⏰ {slotLabel(item.slot, { today: t('checkout.today'), tomorrow: t('checkout.tomorrow') })}</Text>
+            ) : null}
             <View style={styles.row}>
               <Text style={styles.status}>{t(`status.${item.status}` as const)}</Text>
               <Text style={styles.muted}>
@@ -62,4 +65,5 @@ const styles = StyleSheet.create({
   title: { fontSize: font.lg, fontWeight: '700', color: colors.text },
   status: { fontSize: font.md, color: colors.primary, fontWeight: '600' },
   muted: { fontSize: font.sm, color: colors.textMuted },
+  slot: { fontSize: font.sm, fontWeight: '700', color: colors.accentDark },
 });

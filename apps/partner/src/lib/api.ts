@@ -1,3 +1,4 @@
+import { channelName } from '@marketplace/shared';
 import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Database, OrderStatus, Product } from '@marketplace/shared';
@@ -129,7 +130,7 @@ export function useOrderDetail(id: string | undefined) {
       const order = unwrap(
         await supabase
           .from('orders')
-          .select('*, store:stores(id, name, address_line, lat, lng, phone)')
+          .select('*, store:stores(id, name, address_line, lat, lng, phone), slot:delivery_slots(starts_at, ends_at)')
           .eq('id', id!)
           .single(),
       );
@@ -143,7 +144,7 @@ export function useOrderDetail(id: string | undefined) {
   useEffect(() => {
     if (!id) return;
     const ch = supabase
-      .channel(`partner-order-${id}`)
+      .channel(channelName(`partner-order-${id}`))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `id=eq.${id}` }, () =>
         qc.invalidateQueries({ queryKey: ['partner_order', id] }),
       )
@@ -182,7 +183,7 @@ export function useStoreOrders(storeId: string | undefined) {
       unwrap(
         await supabase
           .from('orders')
-          .select('id, number, status, total, created_at, payment_method, courier_id, substitution_policy')
+          .select('id, number, status, total, created_at, payment_method, courier_id, substitution_policy, slot:delivery_slots(starts_at, ends_at)')
           .eq('store_id', storeId!)
           .in('status', ['placed', 'accepted', 'picking', 'ready'])
           .order('created_at'),
@@ -191,7 +192,7 @@ export function useStoreOrders(storeId: string | undefined) {
   useEffect(() => {
     if (!storeId) return;
     const ch = supabase
-      .channel(`store-orders-${storeId}`)
+      .channel(channelName(`store-orders-${storeId}`))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `store_id=eq.${storeId}` }, () =>
         qc.invalidateQueries({ queryKey: ['store_orders', storeId] }),
       )
