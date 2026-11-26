@@ -66,9 +66,6 @@
       ],
       "expo-notifications"
     ],
-    "splash": {
-      "backgroundColor": "#FBF7EF"
-    },
     "extra": {
       "router": {
         "asyncRoutes": {
