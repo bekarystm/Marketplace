@@ -1,8 +1,8 @@
 import { Alert, Linking, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { courierNextStatus, errorMessage, formatMoney, formatPhone, formatQuantity } from '@marketplace/shared';
-import { Button, Card, Loading, OsmMap, Row, SectionTitle, colors, font, spacing, useI18n } from '@marketplace/mobile';
-import { useOrderDetail, useReleaseDelivery, useUpdateStatus } from '../../../src/lib/api';
+import { courierNextStatus, errorMessage, formatDistance, formatMoney, formatPhone, formatQuantity } from '@marketplace/shared';
+import { Button, Card, FadeIn, Icon, Loading, OsmMap, Row, SectionTitle, colors, font, formatEta, radius, spacing, useI18n, useRoute, type RouteProfile } from '@marketplace/mobile';
+import { useMyCourier, useMyLocation, useOrderDetail, useReleaseDelivery, useUpdateStatus } from '../../../src/lib/api';
 
 function openNavigator(lat: number, lng: number) {
   const url = Platform.select({
@@ -21,6 +21,17 @@ export default function CourierOrder() {
   const { data, isLoading } = useOrderDetail(id);
   const update = useUpdateStatus();
   const release = useReleaseDelivery();
+  const { data: me } = useMyLocation();
+  const { data: courier } = useMyCourier();
+  const profile: RouteProfile = courier?.vehicle === 'car' ? 'car' : courier?.vehicle === 'foot' ? 'foot' : 'bike';
+  const order0 = data?.order;
+  const headingToStore0 = order0 ? order0.status !== 'delivering' : true;
+  const routeTarget = order0
+    ? headingToStore0 && order0.store
+      ? { lat: order0.store.lat, lng: order0.store.lng }
+      : { lat: order0.lat, lng: order0.lng }
+    : null;
+  const { data: route } = useRoute(me ? { lat: me.lat, lng: me.lng } : null, routeTarget, profile);
 
   if (isLoading || !data) return <Loading />;
   const { order, items, client } = data;
@@ -57,9 +68,22 @@ export default function CourierOrder() {
         markers={[
           ...(store ? [{ id: 'store', kind: 'store' as const, lat: store.lat, lng: store.lng }] : []),
           { id: 'home', kind: 'home' as const, lat: order.lat, lng: order.lng },
+          ...(me ? [{ id: 'me', kind: 'courier' as const, lat: me.lat, lng: me.lng }] : []),
         ]}
-        style={{ height: 220, borderRadius: 16 }}
+        route={route?.points}
+        style={{ height: 260, borderRadius: 16 }}
       />
+      {route ? (
+        <FadeIn style={styles.routeChip}>
+          <Icon name={headingToStore ? 'storefront' : 'home'} size={18} color={colors.primary} />
+          <Text style={styles.routeText}>
+            {t(headingToStore ? 'courier.routeToStore' : 'courier.routeToClient', {
+              distance: formatDistance(route.distanceM, locale),
+              eta: formatEta(route.durationS, locale),
+            })}
+          </Text>
+        </FadeIn>
+      ) : null}
       <Text style={styles.status}>{t(`status.${order.status}` as const)}</Text>
 
       <Card style={{ gap: spacing.xs }}>
@@ -122,6 +146,11 @@ export default function CourierOrder() {
 }
 
 const styles = StyleSheet.create({
+  routeChip: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: colors.primarySoft,
+    paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: radius.md,
+  },
+  routeText: { fontSize: font.md, fontWeight: '700', color: colors.primary, flex: 1 },
   status: { fontSize: font.xl, fontWeight: '800', color: colors.primary },
   label: { fontSize: font.md, fontWeight: '700', color: colors.text },
   muted: { fontSize: font.sm, color: colors.textMuted },

@@ -30,6 +30,8 @@ interface Props {
   /** Picker mode: a fixed pin in the centre, reports the centre after each move. */
   picker?: boolean;
   onCenterChange?: (c: { lat: number; lng: number }) => void;
+  /** Polyline drawn on the map (e.g. courier route). */
+  route?: { lat: number; lng: number }[];
   style?: StyleProp<ViewStyle>;
 }
 
@@ -43,7 +45,8 @@ function buildHtml(center: { lat: number; lng: number }, zoom: number, picker: b
 <style>
   html,body,#map{height:100%;margin:0;padding:0}
   .pin{position:absolute;left:50%;top:50%;transform:translate(-50%,-100%);font-size:38px;z-index:1000;pointer-events:none}
-  .mk{font-size:28px;line-height:28px;text-align:center}
+  .mk{font-size:28px;line-height:28px;text-align:center;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+  .leaflet-control-attribution{font-size:9px}
 </style></head><body>
 <div id="map"></div>${picker ? '<div class="pin">📍</div>' : ''}
 <script>
@@ -52,6 +55,7 @@ function buildHtml(center: { lat: number; lng: number }, zoom: number, picker: b
     maxZoom: 19, attribution: '&copy; OpenStreetMap'
   }).addTo(map);
   var layer = L.layerGroup().addTo(map);
+  var routeLayer = L.layerGroup().addTo(map);
   var EMOJI = ${JSON.stringify(EMOJI)};
   function post(m){ window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify(m)); }
   map.on('moveend', function(){ var c = map.getCenter(); post({ type: 'center', lat: c.lat, lng: c.lng }); });
@@ -67,19 +71,45 @@ function buildHtml(center: { lat: number; lng: number }, zoom: number, picker: b
       if (msg.fit && pts.length > 1) map.fitBounds(pts, { padding: [40, 40] });
     }
     if (msg.type === 'center') map.setView([msg.lat, msg.lng], msg.zoom || map.getZoom());
+    if (msg.type === 'route') {
+      routeLayer.clearLayers();
+      if (msg.points && msg.points.length > 1) {
+        var ll = msg.points.map(function(p){ return [p.lat, p.lng]; });
+        L.polyline(ll, { color: '#ffffff', weight: 9, opacity: 0.9 }).addTo(routeLayer);
+        L.polyline(ll, { color: '#1F4D2B', weight: 5, opacity: 0.95 }).addTo(routeLayer);
+        if (msg.fit) map.fitBounds(ll, { padding: [36, 36] });
+      }
+    }
   }
   document.addEventListener('message', function(e){ handle(e.data); });
   window.addEventListener('message', function(e){ handle(e.data); });
 </script></body></html>`;
 }
 
-export function OsmMap({ center, zoom = 15, markers, picker = false, onCenterChange, style }: Props) {
+export function OsmMap({ center, zoom = 15, markers, picker = false, onCenterChange, route, style }: Props) {
   const ref = useRef<WebViewHandle>(null);
   const loaded = useRef(false);
   // build the page once; later changes are sent as messages
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const html = useMemo(() => buildHtml(center, zoom, picker), []);
   const markersJson = JSON.stringify(markers ?? []);
+  const routeJson = JSON.stringify(route ?? []);
+  // re-fit the viewport only when the destination changes (not on every courier move)
+  const fittedDestination = useRef<string | null>(null);
+
+  const sendRoute = () => {
+    if (!route?.length) return;
+    const last = route[route.length - 1];
+    const dest = `${last.lat.toFixed(4)},${last.lng.toFixed(4)}`;
+    const fit = fittedDestination.current !== dest;
+    fittedDestination.current = dest;
+    ref.current?.postMessage(JSON.stringify({ type: 'route', points: route, fit }));
+  };
+
+  useEffect(() => {
+    if (loaded.current) sendRoute();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeJson]);
 
   const sendMarkers = (fit: boolean) =>
     ref.current?.postMessage(JSON.stringify({ type: 'markers', markers: markers ?? [], fit }));
@@ -112,6 +142,7 @@ export function OsmMap({ center, zoom = 15, markers, picker = false, onCenterCha
         onLoadEnd={() => {
           loaded.current = true;
           sendMarkers(true);
+          sendRoute();
         }}
         onMessage={(e: WebViewMessageEvent) => {
           try {

@@ -1,8 +1,10 @@
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { EmptyState, Icon, Loading, Logo, colors, font, radius, shadow, spacing, useAuth, useI18n, type IconName } from '@marketplace/mobile';
-import { useStores } from '../../src/lib/api';
+import { localized } from '@marketplace/shared';
+import { EmptyState, FadeIn, Icon, Logo, PressableScale, Skeleton, colors, font, radius, shadow, spacing, useAuth, useI18n, type IconName } from '@marketplace/mobile';
+import { useCategories, useStores, useUsedCategoryIds } from '../../src/lib/api';
+import { categoryStyle } from '../../src/lib/categoryStyle';
 import { useSelectedAddress } from '../../src/lib/hooks';
 import { StoreCard } from '../../src/components/StoreCard';
 
@@ -21,6 +23,16 @@ export default function Home() {
   const { userId } = useAuth();
   const { data: stores, isLoading, refetch, isRefetching } = useStores();
   const { address } = useSelectedAddress();
+  const { data: categories } = useCategories();
+  const { data: usedIds } = useUsedCategoryIds();
+  const shownCategories = (categories ?? []).filter((c) => !c.parent_id && usedIds?.has(c.id)).slice(0, 8);
+  const { locale } = useI18n();
+
+  const openCategory = (categoryId: string) => {
+    // with a single store go straight into its catalog, otherwise show the category across stores
+    if (stores && stores.length === 1) router.push({ pathname: '/store/[id]', params: { id: stores[0].id, category: categoryId } });
+    else router.push(`/category/${categoryId}`);
+  };
 
   return (
     <FlatList
@@ -57,17 +69,44 @@ export default function Home() {
             </View>
           </View>
 
-          <View style={styles.features}>
+          <FadeIn index={1} style={styles.features}>
             <Feature icon="flash-outline" label={t('home.featureFast')} />
             <Feature icon="leaf-outline" label={t('home.featureFresh')} />
             <Feature icon="pricetag-outline" label={t('home.featureDeals')} />
-          </View>
+          </FadeIn>
+
+          {shownCategories.length > 0 ? (
+            <FadeIn index={2} style={{ gap: spacing.md }}>
+              <Text style={styles.title}>{t('store.categories')}</Text>
+              <View style={styles.catGrid}>
+                {shownCategories.map((c) => {
+                  const st = categoryStyle(c.slug);
+                  return (
+                    <View key={c.id} style={styles.catCell}>
+                      <PressableScale style={styles.catInner} scaleTo={0.94} onPress={() => openCategory(c.id)}>
+                        <View style={[styles.catTile, { backgroundColor: st.bg }]}>
+                          <Icon name={st.icon} size={28} color={st.fg} />
+                        </View>
+                        <Text style={styles.catLabel} numberOfLines={2}>{localized(c, 'name', locale)}</Text>
+                      </PressableScale>
+                    </View>
+                  );
+                })}
+              </View>
+            </FadeIn>
+          ) : null}
 
           <Text style={styles.title}>{t('home.stores')}</Text>
         </View>
       }
-      ListEmptyComponent={isLoading ? <Loading /> : <EmptyState icon="storefront-outline" title={t('common.empty')} />}
-      renderItem={({ item }) => <StoreCard store={item} onPress={() => router.push(`/store/${item.id}`)} />}
+      ListEmptyComponent={
+        isLoading ? <Skeleton style={{ height: 190, borderRadius: radius.lg }} /> : <EmptyState icon="storefront-outline" title={t('common.empty')} />
+      }
+      renderItem={({ item, index }) => (
+        <FadeIn index={index + 3}>
+          <StoreCard store={item} onPress={() => router.push(`/store/${item.id}`)} />
+        </FadeIn>
+      )}
     />
   );
 }
@@ -105,4 +144,9 @@ const styles = StyleSheet.create({
   },
   featureText: { fontSize: font.xs, fontWeight: '600', color: colors.text, textAlign: 'center' },
   title: { fontSize: font.xl, fontWeight: '800', color: colors.text },
+  catGrid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -spacing.xs },
+  catCell: { width: '25%', paddingHorizontal: spacing.xs, marginBottom: spacing.md },
+  catInner: { width: '100%', alignItems: 'center', gap: spacing.xs },
+  catTile: { width: '100%', aspectRatio: 1, borderRadius: radius.lg, alignItems: 'center', justifyContent: 'center' },
+  catLabel: { fontSize: font.xs, fontWeight: '600', color: colors.text, textAlign: 'center' },
 });

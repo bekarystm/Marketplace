@@ -1,14 +1,14 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { formatMoney, type Store } from '@marketplace/shared';
-import { Badge, Icon, colors, font, isStoreOpen, radius, shadow, spacing, useI18n } from '@marketplace/mobile';
+import { Badge, Icon, PressableScale, colors, font, isStoreOpen, radius, shadow, spacing, useI18n } from '@marketplace/mobile';
 
 export function StoreCard({ store, onPress }: { store: Store; onPress: () => void }) {
   const { t } = useI18n();
   const open = isStoreOpen(store.opening_hours);
   const freeFrom = store.free_delivery_from ? Number(store.free_delivery_from) : null;
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed && { transform: [{ scale: 0.99 }] }]}>
+    <PressableScale onPress={onPress} style={styles.card} scaleTo={0.98}>
       <View style={styles.cover}>
         {store.cover_url ? (
           <Image source={{ uri: store.cover_url }} style={StyleSheet.absoluteFill} contentFit="cover" />
@@ -49,7 +49,7 @@ export function StoreCard({ store, onPress }: { store: Store; onPress: () => voi
           style={styles.freeBadge}
         />
       ) : null}
-    </Pressable>
+    </PressableScale>
   );
 }
 

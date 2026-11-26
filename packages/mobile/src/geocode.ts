@@ -31,3 +31,39 @@ export async function searchAddress(query: string, near: { lat: number; lng: num
   const data: { display_name: string; lat: string; lon: string }[] = await res.json();
   return data.map((r) => ({ label: r.display_name.split(',').slice(0, 3).join(','), lat: Number(r.lat), lng: Number(r.lon) }));
 }
+
+export type RouteProfile = 'foot' | 'bike' | 'car';
+export interface RouteResult {
+  points: { lat: number; lng: number }[];
+  distanceM: number;
+  durationS: number;
+}
+
+/**
+ * Route between two points over OpenStreetMap roads (OSRM on the FOSSGIS servers,
+ * fair-use policy; switch to a self-hosted OSRM/Valhalla for production traffic).
+ */
+export async function getRoute(
+  from: { lat: number; lng: number },
+  to: { lat: number; lng: number },
+  profile: RouteProfile = 'car',
+): Promise<RouteResult | null> {
+  const host = { foot: 'routed-foot', bike: 'routed-bike', car: 'routed-car' }[profile];
+  const url =
+    `https://routing.openstreetmap.de/${host}/route/v1/driving/` +
+    `${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
+  try {
+    const res = await fetch(url, { headers: { 'User-Agent': 'TDKFOOD/1.0' } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const r = data.routes?.[0];
+    if (!r) return null;
+    return {
+      points: (r.geometry.coordinates as [number, number][]).map(([lng, lat]) => ({ lat, lng })),
+      distanceM: r.distance,
+      durationS: r.duration,
+    };
+  } catch {
+    return null;
+  }
+}

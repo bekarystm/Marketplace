@@ -244,3 +244,15 @@ export function useStoreProductSearch(storeId: string | undefined, search: strin
     },
   });
 }
+
+/** The courier's own last known position (written by the location tracker). */
+export function useMyLocation() {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: ['my_location', userId],
+    enabled: !!userId,
+    refetchInterval: 10_000,
+    queryFn: async () =>
+      unwrapMaybe(await supabase.from('courier_locations').select('lat, lng, updated_at').eq('courier_id', userId!).maybeSingle()),
+  });
+}

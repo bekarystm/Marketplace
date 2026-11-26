@@ -1,6 +1,7 @@
-import type { ComponentProps, ReactNode } from 'react';
+import { useRef, type ComponentProps, type ReactNode } from 'react';
 import {
   ActivityIndicator,
+  Animated,
   Pressable,
   StyleSheet,
   Text,
@@ -58,17 +59,18 @@ export function Button({
   };
   const fg =
     variant === 'secondary' ? colors.text : variant === 'ghost' ? colors.primary : colors.white;
+  const scale = useRef(new Animated.Value(1)).current;
+  const spring = (v: number) => Animated.spring(scale, { toValue: v, useNativeDriver: true, speed: 40, bounciness: v === 1 ? 6 : 0 }).start();
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
+      onPressIn={() => spring(0.97)}
+      onPressOut={() => spring(1)}
       disabled={disabled || loading}
-      style={({ pressed }) => [
-        styles.button,
-        { backgroundColor: bg[variant], opacity: disabled ? 0.45 : pressed ? 0.85 : 1 },
-        style,
-      ]}
+      style={style}
     >
+      <Animated.View style={[styles.button, { backgroundColor: bg[variant], opacity: disabled ? 0.45 : 1, transform: [{ scale }] }]}>
       {loading ? (
         <ActivityIndicator color={fg} />
       ) : (
@@ -79,6 +81,7 @@ export function Button({
           </Text>
         </View>
       )}
+      </Animated.View>
     </Pressable>
   );
 }

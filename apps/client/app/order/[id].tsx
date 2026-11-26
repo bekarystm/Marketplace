@@ -22,7 +22,7 @@ import { useI18n } from '@marketplace/mobile';
 import { OsmMap, type MapMarker } from '@marketplace/mobile';
 import { StatusSteps } from '@marketplace/mobile';
 import { Button, Card, Loading, Row, SectionTitle } from '@marketplace/mobile';
-import { colors, font, spacing } from '@marketplace/mobile';
+import { colors, font, spacing, useRoute, formatEta, PulseDot, FadeIn } from '@marketplace/mobile';
 
 function Stars({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
@@ -49,6 +49,12 @@ export default function OrderScreen() {
   const order = data?.order;
   const tracking = !!order && (order.status === 'ready' || order.status === 'delivering');
   const { data: courierLoc } = useCourierLocation(order?.courier_id, tracking);
+  // route only while the courier is heading to the client
+  const { data: route } = useRoute(
+    order?.status === 'delivering' && courierLoc ? { lat: courierLoc.lat, lng: courierLoc.lng } : null,
+    order ? { lat: order.lat, lng: order.lng } : null,
+    'bike',
+  );
 
   if (isLoading || !order) return <Loading />;
 
@@ -137,7 +143,19 @@ export default function OrderScreen() {
       {tracking && courierLoc ? (
         <>
           <SectionTitle>{t('orders.courierOnTheWay')}</SectionTitle>
-          <OsmMap center={{ lat: order.lat, lng: order.lng }} zoom={14} markers={markers} style={{ height: 220, borderRadius: 16 }} />
+          {route ? (
+            <FadeIn style={styles.eta}>
+              <PulseDot color={colors.accent} size={10} />
+              <Text style={styles.etaText}>{t('orders.courierEta', { eta: formatEta(route.durationS, locale) })}</Text>
+            </FadeIn>
+          ) : null}
+          <OsmMap
+            center={{ lat: order.lat, lng: order.lng }}
+            zoom={14}
+            markers={markers}
+            route={route?.points}
+            style={{ height: 260, borderRadius: 16 }}
+          />
         </>
       ) : null}
 
@@ -191,6 +209,11 @@ export default function OrderScreen() {
 }
 
 const styles = StyleSheet.create({
+  eta: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm, backgroundColor: colors.accentSoft,
+    paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: 12, marginBottom: spacing.sm,
+  },
+  etaText: { fontSize: font.md, fontWeight: '700', color: colors.text, flex: 1 },
   store: { fontSize: font.lg, color: colors.textMuted },
   item: { flexDirection: 'row', gap: spacing.md },
   itemName: { fontSize: font.md, color: colors.text },

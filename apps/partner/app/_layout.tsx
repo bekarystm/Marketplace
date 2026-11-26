@@ -14,9 +14,12 @@ import {
   colors,
   onNotificationOpened,
   registerPushToken,
+  setupQueryFocus,
   useAuth,
   useI18n,
 } from '@marketplace/mobile';
+
+setupQueryFocus();
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 15_000 } } });
 

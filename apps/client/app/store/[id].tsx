@@ -6,15 +6,16 @@ import { useCategories, useProducts, useStore } from '../../src/lib/api';
 import { useI18n } from '@marketplace/mobile';
 import { useCartControls } from '../../src/lib/hooks';
 import { ProductCard } from '../../src/components/ProductCard';
-import { Button, Chip, EmptyState, Loading, SearchField } from '@marketplace/mobile';
+import { Button, Chip, EmptyState, Pop, SearchField } from '@marketplace/mobile';
+import { ProductGridSkeleton } from '../../src/components/ProductGridSkeleton';
 import { colors, font, spacing } from '@marketplace/mobile';
 
 export default function StoreScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, category } = useLocalSearchParams<{ id: string; category?: string }>();
   const { t, locale } = useI18n();
   const { data: store } = useStore(id);
   const { data: categories } = useCategories();
-  const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [categoryId, setCategoryId] = useState<string | null>(category ?? null);
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
   useEffect(() => {
@@ -70,19 +71,21 @@ export default function StoreScreen() {
             </ScrollView>
           </View>
         }
-        ListEmptyComponent={isLoading ? <Loading /> : <EmptyState icon="search-outline" title={t('common.empty')} />}
-        renderItem={({ item }) => (
-          <ProductCard product={item} quantity={quantityOf(item.id)} onChangeQuantity={(q) => change(item, q)} />
+        ListEmptyComponent={isLoading ? <ProductGridSkeleton /> : <EmptyState icon="search-outline" title={t('common.empty')} />}
+        renderItem={({ item, index }) => (
+          <ProductCard product={item} index={index} quantity={quantityOf(item.id)} onChangeQuantity={(q) => change(item, q)} />
         )}
       />
       {totals ? (
         <View style={styles.footer}>
-          <Button
-            variant="accent"
-            icon="cart"
-            title={`${t('tabs.cart')} · ${formatMoney(totals.itemsTotal)}`}
-            onPress={() => router.navigate('/cart')}
-          />
+          <Pop trigger={totals.itemsTotal}>
+            <Button
+              variant="accent"
+              icon="cart"
+              title={`${t('tabs.cart')} · ${formatMoney(totals.itemsTotal)}`}
+              onPress={() => router.navigate('/cart')}
+            />
+          </Pop>
           {totals.minOrderLeft > 0 ? (
             <Text style={styles.warn}>{t('cart.minOrderLeft', { amount: formatMoney(totals.minOrderLeft) })}</Text>
           ) : null}

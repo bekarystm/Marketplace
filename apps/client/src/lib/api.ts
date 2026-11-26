@@ -45,6 +45,18 @@ export function useStore(id: string | undefined) {
   });
 }
 
+/** Category ids that have at least one product in an active store. */
+export function useUsedCategoryIds() {
+  return useQuery({
+    queryKey: ['used_categories'],
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const rows = unwrap(await supabase.from('products').select('category_id').eq('is_available', true).limit(1000));
+      return new Set(rows.map((r) => r.category_id).filter(Boolean) as string[]);
+    },
+  });
+}
+
 export function useCategories() {
   return useQuery({
     queryKey: ['categories'],
@@ -58,7 +70,7 @@ export function useProducts(params: { storeId?: string; categoryId?: string | nu
   const { storeId, categoryId, search } = params;
   return useQuery({
     queryKey: ['products', storeId ?? 'all', categoryId ?? 'all', search ?? ''],
-    enabled: !!storeId || (search?.trim().length ?? 0) >= 2,
+    enabled: !!storeId || !!categoryId || (search?.trim().length ?? 0) >= 2,
     queryFn: async () => {
       let q = supabase.from('products').select('*').order('sort_order').limit(200);
       if (storeId) q = q.eq('store_id', storeId);

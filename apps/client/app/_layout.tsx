@@ -9,9 +9,12 @@ import {
   colors,
   onNotificationOpened,
   registerPushToken,
+  setupQueryFocus,
   useAuth,
   useI18n,
 } from '@marketplace/mobile';
+
+setupQueryFocus();
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -45,6 +48,8 @@ function AppStack() {
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ presentation: 'modal', title: t('auth.title') }} />
       <Stack.Screen name="store/[id]" options={{ title: '' }} />
+      <Stack.Screen name="product/[id]" options={{ title: '' }} />
+      <Stack.Screen name="category/[id]" options={{ title: '' }} />
       <Stack.Screen name="checkout" options={{ title: t('checkout.title') }} />
       <Stack.Screen name="address/new" options={{ title: t('address.title') }} />
       <Stack.Screen name="addresses" options={{ title: t('profile.addresses') }} />

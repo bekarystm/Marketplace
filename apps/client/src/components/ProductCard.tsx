@@ -1,16 +1,19 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { formatMoney, localized, unitLabel, type Product } from '@marketplace/shared';
-import { Badge, Icon, QuantityStepper, colors, font, radius, shadow, spacing, useI18n } from '@marketplace/mobile';
+import { Badge, FadeIn, Icon, PressableScale, QuantityStepper, colors, font, radius, shadow, spacing, useI18n } from '@marketplace/mobile';
 
 export function ProductCard({
   product,
   quantity,
   onChangeQuantity,
+  index = 0,
 }: {
   product: Product;
   quantity: number;
   onChangeQuantity: (q: number) => void;
+  index?: number;
 }) {
   const { t, locale } = useI18n();
   const available = product.is_available && (product.stock_qty == null || Number(product.stock_qty) > 0);
@@ -21,18 +24,20 @@ export function ProductCard({
       : 0;
 
   return (
-    <View style={styles.outer}>
+    <FadeIn index={index} style={styles.outer}>
       <View style={[styles.card, !available && { opacity: 0.55 }]}>
-        <View style={styles.imageWrap}>
+        <Pressable onPress={() => router.push(`/product/${product.id}`)} style={styles.imageWrap}>
           {product.image_urls[0] ? (
-            <Image source={{ uri: product.image_urls[0] }} style={styles.image} contentFit="contain" transition={150} />
+            <Image source={{ uri: product.image_urls[0] }} style={styles.image} contentFit="cover" transition={200} />
           ) : (
             <Icon name="basket-outline" size={40} color={colors.textMuted} />
           )}
           {discount > 0 ? <Badge label={`−${discount}%`} style={styles.discount} /> : null}
-        </View>
+        </Pressable>
 
-        <Text style={styles.name} numberOfLines={2}>{localized(product, 'name', locale)}</Text>
+        <Text style={styles.name} numberOfLines={2} onPress={() => router.push(`/product/${product.id}`)}>
+          {localized(product, 'name', locale)}
+        </Text>
 
         <View style={styles.priceRow}>
           <View style={{ flex: 1 }}>
@@ -43,9 +48,9 @@ export function ProductCard({
             {discount > 0 ? <Text style={styles.oldPrice}>{formatMoney(product.old_price)}</Text> : null}
           </View>
           {available && quantity === 0 ? (
-            <Pressable style={styles.add} onPress={() => onChangeQuantity(step)} accessibilityLabel={t('product.add')} hitSlop={6}>
+            <PressableScale scaleTo={0.85} style={styles.add} onPress={() => onChangeQuantity(step)} accessibilityLabel={t('product.add')} hitSlop={6}>
               <Icon name="add" size={22} color={colors.white} />
-            </Pressable>
+            </PressableScale>
           ) : null}
         </View>
 
@@ -55,7 +60,7 @@ export function ProductCard({
           <QuantityStepper product={product} quantity={quantity} onChange={onChangeQuantity} compact />
         ) : null}
       </View>
-    </View>
+    </FadeIn>
   );
 }
 
@@ -69,7 +74,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1, borderRadius: radius.md, backgroundColor: colors.surface,
     alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   },
-  image: { width: '88%', height: '88%' },
+  image: { width: '100%', height: '100%' },
   discount: { position: 'absolute', top: spacing.sm, left: spacing.sm },
   name: { fontSize: font.sm, color: colors.text, fontWeight: '600', minHeight: 34 },
   priceRow: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm },
